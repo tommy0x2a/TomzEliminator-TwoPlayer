@@ -1,223 +1,428 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <title>TOMZELIMINATOR - TWO PLAYER</title>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
-        body { margin:0; background:#000; color:#0f0; font-family:'Press Start 2P',monospace; overflow:hidden; image-rendering:pixelated; }
-        canvas { display:none; margin:0 auto; border:6px solid #00f; box-shadow:0 0 40px #00f; }
-        #overlay { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-        #menu { text-align:center; background:rgba(0,20,0,0.95); padding:30px 60px; border:4px solid #0f0; box-shadow:0 0 40px #0f0; pointer-events:all; }
-        h1 { font-size:42px; margin:0 0 10px 0; text-shadow:0 0 20px #0f0; letter-spacing:4px; }
-        .subtitle { font-size:18px; margin-bottom:30px; color:#ff0; }
-        .option { font-size:24px; margin:12px 0; cursor:pointer; transition:all 0.2s; }
-        .option:hover { color:#ff0; text-shadow:0 0 15px #ff0; }
-        .instructions { margin-top:30px; font-size:14px; line-height:1.4; max-width:520px; }
-        #hud { position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; pointer-events:none; font-size:14px; }
-        .player-hud { background:rgba(0,20,0,0.8); padding:8px 16px; border:2px solid #0f0; }
+      @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+      body {
+        margin: 0;
+        background: #000;
+        color: #0f0;
+        font-family: "Press Start 2P", monospace;
+        overflow: hidden;
+        image-rendering: pixelated;
+      }
+      canvas {
+        display: none;
+        margin: 0 auto;
+        border: 6px solid #00f;
+        box-shadow: 0 0 40px #00f;
+      }
+      #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      #menu {
+        text-align: center;
+        background: rgba(0, 20, 0, 0.95);
+        padding: 30px 60px;
+        border: 4px solid #0f0;
+        box-shadow: 0 0 40px #0f0;
+        pointer-events: all;
+      }
+      h1 {
+        font-size: 42px;
+        margin: 0 0 10px 0;
+        text-shadow: 0 0 20px #0f0;
+        letter-spacing: 4px;
+      }
+      .subtitle {
+        font-size: 18px;
+        margin-bottom: 30px;
+        color: #ff0;
+      }
+      .option {
+        font-size: 24px;
+        margin: 12px 0;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .option:hover {
+        color: #ff0;
+        text-shadow: 0 0 15px #ff0;
+      }
+      .instructions {
+        margin-top: 30px;
+        font-size: 14px;
+        line-height: 1.4;
+        max-width: 520px;
+      }
+      #hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        font-size: 14px;
+      }
+      .player-hud {
+        background: rgba(0, 20, 0, 0.8);
+        padding: 8px 16px;
+        border: 2px solid #0f0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <canvas id="canvas" width="800" height="600"></canvas>
     <div id="overlay"></div>
-    <div id="hud" style="display:none"></div>
+    <div id="hud" style="display: none"></div>
 
     <script>
-        // ============================================
-        // TOMZELIMINATOR - TWO PLAYER (FULL GAMEPLAY)
-        // Complete working version
-        // ============================================
+      // ============================================
+      // TOMZELIMINATOR - TWO PLAYER (CLEAN VERSION)
+      // ============================================
 
-        const WIDTH = 800;
-        const HEIGHT = 600;
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
+      const WIDTH = 800;
+      const HEIGHT = 600;
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
 
-        const START_POS = [{x:80,y:80},{x:720,y:80},{x:80,y:520},{x:720,y:520}];
-        const PLAYER_COLORS = ["#00ffff", "#ff00ff", "#ffff00", "#00ff00"];
-        const CONTROLS = [
-            {left:"KeyD", right:"KeyF", thrust:"KeyJ", fire:"KeyK"},
-            {left:"KeyA", right:"KeyD", thrust:"KeyW", fire:"KeyS"},
-            {left:"KeyJ", right:"KeyK", thrust:"KeyL", fire:"KeyI"},
-            {left:"Numpad4", right:"Numpad6", thrust:"Numpad8", fire:"Numpad5"}
-        ];
+      const START_POS = [
+        { x: 80, y: 80 },
+        { x: 720, y: 80 },
+        { x: 80, y: 520 },
+        { x: 720, y: 520 },
+      ];
+      const PLAYER_COLORS = ["#00ffff", "#ff00ff", "#ffff00", "#00ff00"];
+      const CONTROLS = [
+        { left: "KeyD", right: "KeyF", thrust: "KeyJ", fire: "KeyK" },
+        { left: "KeyA", right: "KeyD", thrust: "KeyW", fire: "KeyS" },
+        { left: "KeyJ", right: "KeyK", thrust: "KeyL", fire: "KeyI" },
+        {
+          left: "Numpad4",
+          right: "Numpad6",
+          thrust: "Numpad8",
+          fire: "Numpad5",
+        },
+      ];
 
-        let state = "menu";
-        let ships = [];
-        let bolts = [];
-        let base = null;
-        let eliminator = null;
-        let fighters = [];
-        let keys = {};
-        let round = 1;
-        let debugMode = false;
-        let rotationFrozen = false;
+      let state = "menu";
+      let ships = [];
+      let bolts = [];
+      let base = null;
+      let eliminator = null;
+      let keys = {};
+      let round = 1;
+      let debugMode = false;
+      let rotationFrozen = false;
 
-        let peer = null;
-        let conn = null;
-        let isHost = false;
-        let myPlayerId = 0;
+      let peer = null;
+      let conn = null;
+      let isHost = false;
+      let myPlayerId = 0;
 
-        class Ship {
-            constructor(x, y, color, id) {
-                this.startX = START_POS[id].x; this.startY = START_POS[id].y;
-                this.x = this.startX; this.y = this.startY;
-                this.vx = 0; this.vy = 0;
-                this.angle = [Math.PI/4, (3*Math.PI)/4, (7*Math.PI)/4, (5*Math.PI)/4][id];
-                this.color = color; this.id = id; this.radius = 14;
-                this.lives = 12; this.score = 0; this.droids = 0;
-                this.thrusting = false; this.fireCooldown = 0;
-            }
-            update() {
-                if (this.lives <= 0) return;
-                const ctrl = CONTROLS[this.id];
-                if (keys[ctrl.left]) this.angle -= 0.08;
-                if (keys[ctrl.right]) this.angle += 0.08;
-                this.thrusting = keys[ctrl.thrust];
-                if (this.thrusting) { this.vx += Math.cos(this.angle)*0.33; this.vy += Math.sin(this.angle)*0.33; }
-                this.vx *= 0.975; this.vy *= 0.975;
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 20) {this.x=20; this.vx = Math.abs(this.vx)*0.6;}
-                if (this.x > WIDTH-20) {this.x=WIDTH-20; this.vx = -Math.abs(this.vx)*0.6;}
-                if (this.y < 20) {this.y=20; this.vy = Math.abs(this.vy)*0.6;}
-                if (this.y > HEIGHT-20) {this.y=HEIGHT-20; this.vy = -Math.abs(this.vy)*0.6;}
-                if (this.fireCooldown > 0) this.fireCooldown--;
-                if (keys[ctrl.fire] && this.fireCooldown <= 0) { this.fire(); this.fireCooldown = 8; }
-            }
-            fire() {
-                const speed = 9.5;
-                const bx = this.x + Math.cos(this.angle)*22;
-                const by = this.y + Math.sin(this.angle)*22;
-                bolts.push({x:bx, y:by, vx:Math.cos(this.angle)*speed, vy:Math.sin(this.angle)*speed, owner:this.id, life:240});
-            }
-            draw() {
-                if (this.lives <= 0) return;
-                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                ctx.strokeStyle = this.color; ctx.lineWidth = 3; ctx.shadowBlur = 12; ctx.shadowColor = this.color;
-                ctx.beginPath(); ctx.moveTo(22,0); ctx.lineTo(-14,-13); ctx.lineTo(-8,0); ctx.lineTo(-14,13); ctx.closePath(); ctx.stroke();
-                ctx.restore();
-            }
+      class Ship {
+        constructor(x, y, color, id) {
+          this.startX = START_POS[id].x;
+          this.startY = START_POS[id].y;
+          this.x = this.startX;
+          this.y = this.startY;
+          this.vx = 0;
+          this.vy = 0;
+          this.angle = [
+            Math.PI / 4,
+            (3 * Math.PI) / 4,
+            (7 * Math.PI) / 4,
+            (5 * Math.PI) / 4,
+          ][id];
+          this.color = color;
+          this.id = id;
+          this.radius = 14;
+          this.lives = 12;
+          this.score = 0;
+          this.droids = 0;
+          this.thrusting = false;
+          this.fireCooldown = 0;
         }
-
-        class EliminatorBase {
-            constructor() {
-                this.x = WIDTH/2; this.y = HEIGHT/2; this.vx = 0.6; this.vy = 0.4;
-                this.angle = 0; this.radius = 68; this.destroyedTimer = 0;
-                this.tunnelStartX = 0; this.tunnelStartY = 0; this.tunnelEndX = 0; this.tunnelEndY = 0;
-            }
-            update() {
-                if (this.destroyedTimer > 0) { this.destroyedTimer--; return; }
-                this.x += this.vx; this.y += this.vy;
-                if (!rotationFrozen) this.angle += 0.008;
-                if (this.x < 90 || this.x > WIDTH-90) this.vx *= -1;
-                if (this.y < 90 || this.y > HEIGHT-90) this.vy *= -1;
-                this.updateTunnelLine();
-            }
-            updateTunnelLine() {
-                const tunnelAngle = this.angle + Math.PI * 0.78;
-                const startOffset = 20; const tunnelLength = 85;
-                const relTx = Math.cos(tunnelAngle) * startOffset;
-                const relTy = Math.sin(tunnelAngle) * startOffset;
-                const relEx = relTx + Math.cos(tunnelAngle) * tunnelLength;
-                const relEy = relTy + Math.sin(tunnelAngle) * tunnelLength;
-                this.tunnelStartX = this.x + relTx; this.tunnelStartY = this.y + relTy;
-                this.tunnelEndX = this.x + relEx; this.tunnelEndY = this.y + relEy;
-            }
-            draw() {
-                if (this.destroyedTimer > 0) return;
-                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                ctx.strokeStyle = "#00aaff"; ctx.lineWidth = 5; ctx.shadowBlur = 20; ctx.shadowColor = "#00aaff";
-                ctx.beginPath(); ctx.moveTo(0, -this.radius); ctx.quadraticCurveTo(this.radius*0.8, -this.radius*0.6, this.radius, 0);
-                ctx.quadraticCurveTo(this.radius*0.8, this.radius*0.6, 0, this.radius); ctx.quadraticCurveTo(-this.radius*0.8, this.radius*0.6, -this.radius, 0);
-                ctx.quadraticCurveTo(-this.radius*0.8, -this.radius*0.6, 0, -this.radius); ctx.closePath(); ctx.stroke();
-                ctx.restore();
-
-                // Tunnel
-                ctx.strokeStyle = "#000000"; ctx.lineWidth = 32; ctx.shadowBlur = 0;
-                ctx.beginPath(); ctx.moveTo(this.tunnelStartX, this.tunnelStartY); ctx.lineTo(this.tunnelEndX, this.tunnelEndY); ctx.stroke();
-                ctx.strokeStyle = "#00aaff"; ctx.lineWidth = 42; ctx.shadowBlur = 8; ctx.shadowColor = "#00aaff";
-                ctx.beginPath(); ctx.moveTo(this.tunnelStartX, this.tunnelStartY); ctx.lineTo(this.tunnelEndX, this.tunnelEndY); ctx.stroke();
-            }
-            isTunnelHit(bx, by) {
-                if (this.destroyedTimer > 0) return false;
-                const dx = this.tunnelEndX - this.tunnelStartX; const dy = this.tunnelEndY - this.tunnelStartY;
-                const lenSq = dx*dx + dy*dy; if (lenSq === 0) return false;
-                let t = ((bx - this.tunnelStartX)*dx + (by - this.tunnelStartY)*dy) / lenSq;
-                t = Math.max(0, Math.min(1, t));
-                const projX = this.tunnelStartX + t*dx; const projY = this.tunnelStartY + t*dy;
-                return Math.hypot(bx - projX, by - projY) < 7;
-            }
+        update() {
+          if (this.lives <= 0) return;
+          const ctrl = CONTROLS[this.id];
+          if (keys[ctrl.left]) this.angle -= 0.08;
+          if (keys[ctrl.right]) this.angle += 0.08;
+          this.thrusting = keys[ctrl.thrust];
+          if (this.thrusting) {
+            this.vx += Math.cos(this.angle) * 0.33;
+            this.vy += Math.sin(this.angle) * 0.33;
+          }
+          this.vx *= 0.975;
+          this.vy *= 0.975;
+          this.x += this.vx;
+          this.y += this.vy;
+          if (this.x < 20) {
+            this.x = 20;
+            this.vx = Math.abs(this.vx) * 0.6;
+          }
+          if (this.x > WIDTH - 20) {
+            this.x = WIDTH - 20;
+            this.vx = -Math.abs(this.vx) * 0.6;
+          }
+          if (this.y < 20) {
+            this.y = 20;
+            this.vy = Math.abs(this.vy) * 0.6;
+          }
+          if (this.y > HEIGHT - 20) {
+            this.y = HEIGHT - 20;
+            this.vy = -Math.abs(this.vy) * 0.6;
+          }
+          if (this.fireCooldown > 0) this.fireCooldown--;
+          if (keys[ctrl.fire] && this.fireCooldown <= 0) {
+            this.fire();
+            this.fireCooldown = 8;
+          }
         }
-
-        class EliminatorEnemy {
-            constructor(base) {
-                this.base = base; this.x = base.x; this.y = base.y; this.vx = 0; this.vy = 0;
-                this.angle = 0; this.state = "forming"; this.formTimer = 520; this.radius = 13;
-            }
-            update() {
-                if (this.state === "forming") { this.formTimer--; if (this.formTimer <= 0) this.state = "emerged"; return; }
-                let target = ships.find(s => s.lives > 0);
-                if (target) {
-                    const a = Math.atan2(target.y - this.y, target.x - this.x);
-                    this.vx += Math.cos(a) * 0.08; this.vy += Math.sin(a) * 0.08; this.angle = a;
-                }
-                this.x += this.vx; this.y += this.vy; this.vx *= 0.94; this.vy *= 0.94;
-            }
-            draw() {
-                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                ctx.strokeStyle = this.state === "forming" ? "#ff8800" : "#ff2222";
-                ctx.lineWidth = 3; ctx.shadowBlur = 15; ctx.shadowColor = "#ff2222";
-                ctx.beginPath(); ctx.moveTo(18,0); ctx.lineTo(-12,-11); ctx.lineTo(-8,0); ctx.lineTo(-12,11); ctx.closePath(); ctx.stroke();
-                ctx.restore();
-            }
+        fire() {
+          const speed = 9.5;
+          const bx = this.x + Math.cos(this.angle) * 22;
+          const by = this.y + Math.sin(this.angle) * 22;
+          bolts.push({
+            x: bx,
+            y: by,
+            vx: Math.cos(this.angle) * speed,
+            vy: Math.sin(this.angle) * speed,
+            owner: this.id,
+            life: 240,
+          });
         }
-
-        function initGame(numPlayers) {
-            ships = [];
-            for (let i = 0; i < numPlayers; i++) {
-                const pos = START_POS[i % 4];
-                ships.push(new Ship(pos.x, pos.y, PLAYER_COLORS[i], i));
-            }
-            base = new EliminatorBase();
-            eliminator = new EliminatorEnemy(base);
-            fighters = []; bolts = [];
-            document.getElementById("hud").style.display = "flex";
+        draw() {
+          if (this.lives <= 0) return;
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 3;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = this.color;
+          ctx.beginPath();
+          ctx.moveTo(22, 0);
+          ctx.lineTo(-14, -13);
+          ctx.lineTo(-8, 0);
+          ctx.lineTo(-14, 13);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
         }
+      }
 
-        function update() {
-            if (state !== "playing") return;
-            ships.forEach(s => s.update());
-            if (base) base.update();
-            if (eliminator) eliminator.update();
-            for (let i = bolts.length-1; i>=0; i--) {
-                const b = bolts[i]; b.x += b.vx; b.y += b.vy; b.life--;
-                if (b.life <= 0) bolts.splice(i,1);
-            }
+      class EliminatorBase {
+        constructor() {
+          this.x = WIDTH / 2;
+          this.y = HEIGHT / 2;
+          this.vx = 0.6;
+          this.vy = 0.4;
+          this.angle = 0;
+          this.radius = 68;
+          this.destroyedTimer = 0;
+          this.tunnelStartX = 0;
+          this.tunnelStartY = 0;
+          this.tunnelEndX = 0;
+          this.tunnelEndY = 0;
         }
-
-        function draw() {
-            ctx.fillStyle = "#000811"; ctx.fillRect(0,0,WIDTH,HEIGHT);
-            if (base) base.draw();
-            if (eliminator) eliminator.draw();
-            ships.forEach(s => s.draw());
-            ctx.fillStyle = "#00ffff"; bolts.forEach(b => ctx.fillRect(b.x-2, b.y-2, 4, 4));
+        update() {
+          if (this.destroyedTimer > 0) {
+            this.destroyedTimer--;
+            return;
+          }
+          this.x += this.vx;
+          this.y += this.vy;
+          if (!rotationFrozen) this.angle += 0.008;
+          if (this.x < 90 || this.x > WIDTH - 90) this.vx *= -1;
+          if (this.y < 90 || this.y > HEIGHT - 90) this.vy *= -1;
+          this.updateTunnelLine();
         }
-
-        function gameLoop() {
-            update(); draw(); requestAnimationFrame(gameLoop);
+        updateTunnelLine() {
+          const tunnelAngle = this.angle + Math.PI * 0.78;
+          const startOffset = 20;
+          const tunnelLength = 85;
+          const relTx = Math.cos(tunnelAngle) * startOffset;
+          const relTy = Math.sin(tunnelAngle) * startOffset;
+          const relEx = relTx + Math.cos(tunnelAngle) * tunnelLength;
+          const relEy = relTy + Math.sin(tunnelAngle) * tunnelLength;
+          this.tunnelStartX = this.x + relTx;
+          this.tunnelStartY = this.y + relTy;
+          this.tunnelEndX = this.x + relEx;
+          this.tunnelEndY = this.y + relEy;
         }
+        draw() {
+          if (this.destroyedTimer > 0) return;
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.strokeStyle = "#00aaff";
+          ctx.lineWidth = 5;
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = "#00aaff";
+          ctx.beginPath();
+          ctx.moveTo(0, -this.radius);
+          ctx.quadraticCurveTo(
+            this.radius * 0.8,
+            -this.radius * 0.6,
+            this.radius,
+            0,
+          );
+          ctx.quadraticCurveTo(
+            this.radius * 0.8,
+            this.radius * 0.6,
+            0,
+            this.radius,
+          );
+          ctx.quadraticCurveTo(
+            -this.radius * 0.8,
+            this.radius * 0.6,
+            -this.radius,
+            0,
+          );
+          ctx.quadraticCurveTo(
+            -this.radius * 0.8,
+            -this.radius * 0.6,
+            0,
+            -this.radius,
+          );
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
 
-        function startMultiplayerGame() {
-            document.getElementById("overlay").innerHTML = "";
-            canvas.style.display = "block";
-            initGame(2); state = "playing";
+          // Tunnel
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 32;
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
+          ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#00aaff";
+          ctx.lineWidth = 42;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "#00aaff";
+          ctx.beginPath();
+          ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
+          ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
+          ctx.stroke();
         }
+      }
 
-        function showMenu() {
-            const overlay = document.getElementById("overlay");
-            overlay.innerHTML = `
+      class EliminatorEnemy {
+        constructor(base) {
+          this.base = base;
+          this.x = base.x;
+          this.y = base.y;
+          this.vx = 0;
+          this.vy = 0;
+          this.angle = 0;
+          this.state = "forming";
+          this.formTimer = 520;
+          this.radius = 13;
+        }
+        update() {
+          if (this.state === "forming") {
+            this.formTimer--;
+            if (this.formTimer <= 0) this.state = "emerged";
+            return;
+          }
+          let target = ships.find((s) => s.lives > 0);
+          if (target) {
+            const a = Math.atan2(target.y - this.y, target.x - this.x);
+            this.vx += Math.cos(a) * 0.08;
+            this.vy += Math.sin(a) * 0.08;
+            this.angle = a;
+          }
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.94;
+          this.vy *= 0.94;
+        }
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.strokeStyle = this.state === "forming" ? "#ff8800" : "#ff2222";
+          ctx.lineWidth = 3;
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = "#ff2222";
+          ctx.beginPath();
+          ctx.moveTo(18, 0);
+          ctx.lineTo(-12, -11);
+          ctx.lineTo(-8, 0);
+          ctx.lineTo(-12, 11);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function initGame(numPlayers) {
+        ships = [];
+        for (let i = 0; i < numPlayers; i++) {
+          const pos = START_POS[i % 4];
+          ships.push(new Ship(pos.x, pos.y, PLAYER_COLORS[i], i));
+        }
+        base = new EliminatorBase();
+        eliminator = new EliminatorEnemy(base);
+        bolts = [];
+        document.getElementById("hud").style.display = "flex";
+      }
+
+      function update() {
+        if (state !== "playing") return;
+        ships.forEach((s) => s.update());
+        if (base) base.update();
+        if (eliminator) eliminator.update();
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          b.life--;
+          if (b.life <= 0) bolts.splice(i, 1);
+        }
+      }
+
+      function draw() {
+        ctx.fillStyle = "#000811";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        if (base) base.draw();
+        if (eliminator) eliminator.draw();
+        ships.forEach((s) => s.draw());
+        ctx.fillStyle = "#00ffff";
+        bolts.forEach((b) => ctx.fillRect(b.x - 2, b.y - 2, 4, 4));
+      }
+
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      function startMultiplayerGame() {
+        document.getElementById("overlay").innerHTML = "";
+        canvas.style.display = "block";
+        initGame(2);
+        state = "playing";
+      }
+
+      function showMenu() {
+        const overlay = document.getElementById("overlay");
+        overlay.innerHTML = `
                 <div id="menu">
                     <h1>TOMZELIMINATOR</h1>
                     <div class="subtitle">TWO PLAYER — PEER TO PEER</div>
@@ -227,33 +432,46 @@
                     <div id="roomStatus" style="margin-top:15px; font-size:13px; color:#ff0;"></div>
                 </div>
             `;
-        }
+      }
 
-        function createRoom() {
-            peer = new Peer();
-            peer.on("open", id => {
-                document.getElementById("roomStatus").innerHTML = `ROOM CODE: <b style="font-size:22px">${id}</b><br>Waiting for player 2...`;
-                isHost = true; myPlayerId = 0;
-                peer.on("connection", connection => {
-                    conn = connection; conn.on("open", () => startMultiplayerGame());
-                });
-            });
-        }
+      function createRoom() {
+        peer = new Peer();
+        peer.on("open", (id) => {
+          document.getElementById("roomStatus").innerHTML =
+            `ROOM CODE: <b style="font-size:22px">${id}</b><br>Waiting for player 2...`;
+          isHost = true;
+          myPlayerId = 0;
+          peer.on("connection", (connection) => {
+            conn = connection;
+            conn.on("open", () => startMultiplayerGame());
+          });
+        });
+      }
 
-        function joinRoom(roomId) {
-            peer = new Peer(); peer.on("open", () => {
-                conn = peer.connect(roomId);
-                conn.on("open", () => { isHost = false; myPlayerId = 1; startMultiplayerGame(); });
-            });
-        }
+      function joinRoom(roomId) {
+        peer = new Peer();
+        peer.on("open", () => {
+          conn = peer.connect(roomId);
+          conn.on("open", () => {
+            isHost = false;
+            myPlayerId = 1;
+            startMultiplayerGame();
+          });
+        });
+      }
 
-        function joinRoomPrompt() {
-            const code = prompt("Enter Room Code:"); if (code) joinRoom(code);
-        }
+      function joinRoomPrompt() {
+        const code = prompt("Enter Room Code:");
+        if (code) joinRoom(code);
+      }
 
-        window.onload = function() {
-            showMenu(); gameLoop();
-        };
+      window.onload = function () {
+        showMenu();
+        gameLoop();
+      };
+
+      window.addEventListener("keydown", (e) => (keys[e.code] = true));
+      window.addEventListener("keyup", (e) => (keys[e.code] = false));
     </script>
-</body>
+  </body>
 </html>
