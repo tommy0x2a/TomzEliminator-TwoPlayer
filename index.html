@@ -100,1253 +100,1257 @@
     <div id="gameTitle"></div>
 
     <script>
-            const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            const Sound = {
-              playLaser() {
-                const osc = AudioCtx.createOscillator(),
-                  gain = AudioCtx.createGain();
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(680, AudioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(
-                  120,
-                  AudioCtx.currentTime + 0.12,
-                );
-                gain.gain.setValueAtTime(0.25, AudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.12,
-                );
-                osc.connect(gain).connect(AudioCtx.destination);
-                osc.start();
-                osc.stop(AudioCtx.currentTime + 0.15);
-              },
-              playEnemyLaser() {
-                const osc = AudioCtx.createOscillator(),
-                  gain = AudioCtx.createGain();
-                osc.type = "square";
-                osc.frequency.setValueAtTime(420, AudioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(
-                  80,
-                  AudioCtx.currentTime + 0.18,
-                );
-                gain.gain.setValueAtTime(0.2, AudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.18,
-                );
-                osc.connect(gain).connect(AudioCtx.destination);
-                osc.start();
-                osc.stop(AudioCtx.currentTime + 0.2);
-              },
-              playHit() {
-                const noise = AudioCtx.createBufferSource(),
-                  buffer = AudioCtx.createBuffer(
-                    1,
-                    AudioCtx.sampleRate * 0.08,
-                    AudioCtx.sampleRate,
-                  );
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < buffer.length; i++)
-                  data[i] = Math.random() * 2 - 1;
-                noise.buffer = buffer;
-                const filter = AudioCtx.createBiquadFilter();
-                filter.type = "highpass";
-                filter.frequency.setValueAtTime(1200, AudioCtx.currentTime);
-                const gain = AudioCtx.createGain();
-                gain.gain.setValueAtTime(0.4, AudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.08,
-                );
-                noise.connect(filter).connect(gain).connect(AudioCtx.destination);
-                noise.start();
-              },
-              playExplode() {
-                const noise = AudioCtx.createBufferSource(),
-                  buffer = AudioCtx.createBuffer(
-                    1,
-                    AudioCtx.sampleRate * 0.35,
-                    AudioCtx.sampleRate,
-                  );
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < buffer.length; i++)
-                  data[i] = Math.random() * 2 - 1;
-                noise.buffer = buffer;
-                const filter = AudioCtx.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.setValueAtTime(800, AudioCtx.currentTime);
-                filter.frequency.exponentialRampToValueAtTime(
-                  60,
-                  AudioCtx.currentTime + 0.35,
-                );
-                const gain = AudioCtx.createGain();
-                gain.gain.setValueAtTime(0.7, AudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.35,
-                );
-                noise.connect(filter).connect(gain).connect(AudioCtx.destination);
-                noise.start();
-              },
-              playBaseExplode() {
-                const noise = AudioCtx.createBufferSource(),
-                  buffer = AudioCtx.createBuffer(
-                    1,
-                    AudioCtx.sampleRate * 0.85,
-                    AudioCtx.sampleRate,
-                  );
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < buffer.length; i++)
-                  data[i] = Math.random() * 2 - 1;
-                noise.buffer = buffer;
-                const filter = AudioCtx.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.setValueAtTime(420, AudioCtx.currentTime);
-                filter.frequency.exponentialRampToValueAtTime(
-                  35,
-                  AudioCtx.currentTime + 0.85,
-                );
-                const gain = AudioCtx.createGain();
-                gain.gain.setValueAtTime(1.2, AudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.85,
-                );
-                noise.connect(filter).connect(gain).connect(AudioCtx.destination);
-                noise.start();
-                const rumble = AudioCtx.createOscillator();
-                rumble.type = "sine";
-                rumble.frequency.setValueAtTime(65, AudioCtx.currentTime);
-                const rumbleGain = AudioCtx.createGain();
-                rumbleGain.gain.setValueAtTime(0.6, AudioCtx.currentTime);
-                rumbleGain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.7,
-                );
-                rumble.connect(rumbleGain).connect(AudioCtx.destination);
-                rumble.start();
-                rumble.stop(AudioCtx.currentTime + 0.8);
-              },
-              playBounce() {
-                const osc = AudioCtx.createOscillator(),
-                  gain = AudioCtx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(280, AudioCtx.currentTime);
-                gain.gain.setValueAtTime(0.15, AudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(
-                  0.001,
-                  AudioCtx.currentTime + 0.04,
-                );
-                osc.connect(gain).connect(AudioCtx.destination);
-                osc.start();
-                osc.stop(AudioCtx.currentTime + 0.05);
-              },
-            };
+      const Sound = {
+        playLaser() {
+          const osc = AudioCtx.createOscillator(),
+            gain = AudioCtx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(680, AudioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(
+            120,
+            AudioCtx.currentTime + 0.12,
+          );
+          gain.gain.setValueAtTime(0.25, AudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.12,
+          );
+          osc.connect(gain).connect(AudioCtx.destination);
+          osc.start();
+          osc.stop(AudioCtx.currentTime + 0.15);
+        },
+        playEnemyLaser() {
+          const osc = AudioCtx.createOscillator(),
+            gain = AudioCtx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(420, AudioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(
+            80,
+            AudioCtx.currentTime + 0.18,
+          );
+          gain.gain.setValueAtTime(0.2, AudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.18,
+          );
+          osc.connect(gain).connect(AudioCtx.destination);
+          osc.start();
+          osc.stop(AudioCtx.currentTime + 0.2);
+        },
+        playHit() {
+          const noise = AudioCtx.createBufferSource(),
+            buffer = AudioCtx.createBuffer(
+              1,
+              AudioCtx.sampleRate * 0.08,
+              AudioCtx.sampleRate,
+            );
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < buffer.length; i++)
+            data[i] = Math.random() * 2 - 1;
+          noise.buffer = buffer;
+          const filter = AudioCtx.createBiquadFilter();
+          filter.type = "highpass";
+          filter.frequency.setValueAtTime(1200, AudioCtx.currentTime);
+          const gain = AudioCtx.createGain();
+          gain.gain.setValueAtTime(0.4, AudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.08,
+          );
+          noise.connect(filter).connect(gain).connect(AudioCtx.destination);
+          noise.start();
+        },
+        playExplode() {
+          const noise = AudioCtx.createBufferSource(),
+            buffer = AudioCtx.createBuffer(
+              1,
+              AudioCtx.sampleRate * 0.35,
+              AudioCtx.sampleRate,
+            );
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < buffer.length; i++)
+            data[i] = Math.random() * 2 - 1;
+          noise.buffer = buffer;
+          const filter = AudioCtx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(800, AudioCtx.currentTime);
+          filter.frequency.exponentialRampToValueAtTime(
+            60,
+            AudioCtx.currentTime + 0.35,
+          );
+          const gain = AudioCtx.createGain();
+          gain.gain.setValueAtTime(0.7, AudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.35,
+          );
+          noise.connect(filter).connect(gain).connect(AudioCtx.destination);
+          noise.start();
+        },
+        playBaseExplode() {
+          const noise = AudioCtx.createBufferSource(),
+            buffer = AudioCtx.createBuffer(
+              1,
+              AudioCtx.sampleRate * 0.85,
+              AudioCtx.sampleRate,
+            );
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < buffer.length; i++)
+            data[i] = Math.random() * 2 - 1;
+          noise.buffer = buffer;
+          const filter = AudioCtx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(420, AudioCtx.currentTime);
+          filter.frequency.exponentialRampToValueAtTime(
+            35,
+            AudioCtx.currentTime + 0.85,
+          );
+          const gain = AudioCtx.createGain();
+          gain.gain.setValueAtTime(1.2, AudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.85,
+          );
+          noise.connect(filter).connect(gain).connect(AudioCtx.destination);
+          noise.start();
+          const rumble = AudioCtx.createOscillator();
+          rumble.type = "sine";
+          rumble.frequency.setValueAtTime(65, AudioCtx.currentTime);
+          const rumbleGain = AudioCtx.createGain();
+          rumbleGain.gain.setValueAtTime(0.6, AudioCtx.currentTime);
+          rumbleGain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.7,
+          );
+          rumble.connect(rumbleGain).connect(AudioCtx.destination);
+          rumble.start();
+          rumble.stop(AudioCtx.currentTime + 0.8);
+        },
+        playBounce() {
+          const osc = AudioCtx.createOscillator(),
+            gain = AudioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(280, AudioCtx.currentTime);
+          gain.gain.setValueAtTime(0.15, AudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            AudioCtx.currentTime + 0.04,
+          );
+          osc.connect(gain).connect(AudioCtx.destination);
+          osc.start();
+          osc.stop(AudioCtx.currentTime + 0.05);
+        },
+      };
 
-            const canvas = document.getElementById("canvas");
-            const ctx = canvas.getContext("2d");
-            const WIDTH = 800,
-              HEIGHT = 600;
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const WIDTH = 800,
+        HEIGHT = 600;
 
-            let state = "menu";
-            let numPlayers = 0;
-            let ships = [],
-              bolts = [],
-              enemyBolts = [],
-              fireballs = [],
-              fighters = [],
-              baseFragments = [];
-            let base = null,
-              eliminator = null;
-            let round = 1;
-            let keys = {};
-            let lastFighterSpawn = 0;
+      let state = "menu";
+      let numPlayers = 0;
+      let ships = [],
+        bolts = [],
+        enemyBolts = [],
+        fireballs = [],
+        fighters = [],
+        baseFragments = [];
+      let base = null,
+        eliminator = null;
+      let round = 1;
+      let keys = {};
+      let lastFighterSpawn = 0;
 
-            let debugMode = false;
-            let rotationFrozen = false;
-            let lastExplosionReason = "none";
+      let debugMode = false;
+      let rotationFrozen = false;
+      let lastExplosionReason = "none";
 
-            // === NEW MULTIPLAYER VARIABLES ===
-            let peer = null;
-            let conn = null;
-            let isHost = false;
-            let multiplayer = false;
-            let guestKeys = {};
-            let stateSendCounter = 0;
-            let inputInterval = null;
-            // ================================
+      // === NEW MULTIPLAYER VARIABLES ===
+      let peer = null;
+      let conn = null;
+      let isHost = false;
+      let multiplayer = false;
+      let guestKeys = {};
+      let stateSendCounter = 0;
+      let inputInterval = null;
+      // ================================
 
-            const PLAYER_COLORS = ["#00ffff", "#ff00ff", "#ffff00", "#00ff00"];
-            const START_POS = [
-              { x: 80, y: 80 },
-              { x: 720, y: 80 },
-              { x: 80, y: 520 },
-              { x: 720, y: 520 },
-            ];
-            const CONTROLS = [
-              { left: "KeyD", right: "KeyF", thrust: "KeyJ", fire: "KeyK" },
-              { left: "KeyA", right: "KeyD", thrust: "KeyW", fire: "KeyS" },
-              { left: "KeyJ", right: "KeyK", thrust: "KeyL", fire: "KeyI" },
-              {
-                left: "Numpad4",
-                right: "Numpad6",
-                thrust: "Numpad8",
-                fire: "Numpad5",
-              },
-            ];
+      const PLAYER_COLORS = ["#00ffff", "#ff00ff", "#ffff00", "#00ff00"];
+      const START_POS = [
+        { x: 80, y: 80 },
+        { x: 720, y: 80 },
+        { x: 80, y: 520 },
+        { x: 720, y: 520 },
+      ];
+      const CONTROLS = [
+        { left: "KeyD", right: "KeyF", thrust: "KeyJ", fire: "KeyK" },
+        { left: "KeyA", right: "KeyD", thrust: "KeyW", fire: "KeyS" },
+        { left: "KeyJ", right: "KeyK", thrust: "KeyL", fire: "KeyI" },
+        {
+          left: "Numpad4",
+          right: "Numpad6",
+          thrust: "Numpad8",
+          fire: "Numpad5",
+        },
+      ];
 
-            function bounce(obj, padding = 5, strength = 0.96) {
-              if (obj.x < padding) {
-                obj.x = padding;
-                obj.vx = -obj.vx * strength;
-                Sound.playBounce();
-              }
-              if (obj.x > WIDTH - padding) {
-                obj.x = WIDTH - padding;
-                obj.vx = -obj.vx * strength;
-                Sound.playBounce();
-              }
-              if (obj.y < padding) {
-                obj.y = padding;
-                obj.vy = -obj.vy * strength;
-                Sound.playBounce();
-              }
-              if (obj.y > HEIGHT - padding) {
-                obj.y = HEIGHT - padding;
-                obj.vy = -obj.vy * strength;
-                Sound.playBounce();
+      function bounce(obj, padding = 5, strength = 0.96) {
+        if (obj.x < padding) {
+          obj.x = padding;
+          obj.vx = -obj.vx * strength;
+          Sound.playBounce();
+        }
+        if (obj.x > WIDTH - padding) {
+          obj.x = WIDTH - padding;
+          obj.vx = -obj.vx * strength;
+          Sound.playBounce();
+        }
+        if (obj.y < padding) {
+          obj.y = padding;
+          obj.vy = -obj.vy * strength;
+          Sound.playBounce();
+        }
+        if (obj.y > HEIGHT - padding) {
+          obj.y = HEIGHT - padding;
+          obj.vy = -obj.vy * strength;
+          Sound.playBounce();
+        }
+      }
+
+      class Ship {
+        constructor(x, y, color, id) {
+          this.startX = START_POS[id].x;
+          this.startY = START_POS[id].y;
+          this.x = this.startX;
+          this.y = this.startY;
+          this.vx = 0;
+          this.vy = 0;
+          this.angle = [
+            Math.PI / 4,
+            (3 * Math.PI) / 4,
+            (7 * Math.PI) / 4,
+            (5 * Math.PI) / 4,
+          ][id];
+          this.color = color;
+          this.id = id;
+          this.radius = 14;
+          this.lives = 12;
+          this.score = 0;
+          this.droids = 0;
+          this.thrusting = false;
+          this.fireCooldown = 0;
+          this.lastPushedBy = null;
+        }
+        respawn() {
+          if (this.lives > 0) {
+            this.x = this.startX;
+            this.y = this.startY;
+            this.vx = 0;
+            this.vy = 0;
+            this.angle = [
+              Math.PI / 4,
+              (3 * Math.PI) / 4,
+              (7 * Math.PI) / 4,
+              (5 * Math.PI) / 4,
+            ][this.id];
+            this.lastPushedBy = null;
+          }
+        }
+        update() {
+          if (this.lives <= 0) return;
+
+          // === MULTIPLAYER: Both players use D/F/J/K controls (no key contention across tabs) ===
+          let ctrl = CONTROLS[this.id];
+          if (multiplayer && this.id === 1) {
+            ctrl = CONTROLS[0]; // Guest (magenta ship) uses same keys as host
+          }
+
+          let input = keys;
+
+          if (multiplayer) {
+            if (isHost && this.id === 1) {
+              input = guestKeys || {};
+            } else if (!isHost && this.id === 0) {
+              input = {}; // Guest does not control host's ship
+            }
+          }
+          // ====================================================================================
+
+          if (input[ctrl.left]) this.angle -= 0.08;
+          if (input[ctrl.right]) this.angle += 0.08;
+          this.thrusting = input[ctrl.thrust] || false;
+          if (this.thrusting) {
+            this.vx += Math.cos(this.angle) * 0.33;
+            this.vy += Math.sin(this.angle) * 0.33;
+          }
+          this.vx *= 0.975;
+          this.vy *= 0.975;
+          this.x += this.vx;
+          this.y += this.vy;
+          bounce(this, 20);
+          if (this.x <= 20 || this.x >= WIDTH - 20)
+            this.angle = Math.PI - this.angle;
+          if (this.y <= 20 || this.y >= HEIGHT - 20) this.angle = -this.angle;
+          this.angle =
+            ((this.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+          if (this.fireCooldown > 0) this.fireCooldown--;
+          let myBoltCount = 0;
+          for (let i = 0; i < bolts.length; i++)
+            if (bolts[i].owner === this.id) myBoltCount++;
+          if (input[ctrl.fire] && this.fireCooldown <= 0) {
+            if (myBoltCount >= 3) {
+              for (let i = 0; i < bolts.length; i++) {
+                if (bolts[i].owner === this.id) {
+                  bolts.splice(i, 1);
+                  break;
+                }
               }
             }
+            this.fire();
+            this.fireCooldown = 8;
+          }
+        }
+        fire() {
+          Sound.playLaser();
+          const speed = 9.5;
+          const bx = this.x + Math.cos(this.angle) * 22;
+          const by = this.y + Math.sin(this.angle) * 22;
+          bolts.push({
+            x: bx,
+            y: by,
+            vx: this.vx + Math.cos(this.angle) * speed,
+            vy: this.vy + Math.sin(this.angle) * speed,
+            owner: this.id,
+            life: 240,
+            power: 1.15,
+          });
+        }
+        draw() {
+          if (this.lives <= 0) return;
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 3;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = this.color;
+          ctx.beginPath();
+          ctx.moveTo(22, 0);
+          ctx.lineTo(-14, -13);
+          ctx.lineTo(-8, 0);
+          ctx.lineTo(-14, 13);
+          ctx.closePath();
+          ctx.stroke();
+          if (this.thrusting) {
+            ctx.strokeStyle = "#ff8800";
+            ctx.shadowColor = "#ff8800";
+            ctx.beginPath();
+            ctx.moveTo(-12, -7);
+            ctx.lineTo(-26 - Math.random() * 8, 0);
+            ctx.lineTo(-12, 7);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
 
-            class Ship {
-              constructor(x, y, color, id) {
-                this.startX = START_POS[id].x;
-                this.startY = START_POS[id].y;
-                this.x = this.startX;
-                this.y = this.startY;
-                this.vx = 0;
-                this.vy = 0;
-                this.angle = [
-                  Math.PI / 4,
-                  (3 * Math.PI) / 4,
-                  (7 * Math.PI) / 4,
-                  (5 * Math.PI) / 4,
-                ][id];
-                this.color = color;
-                this.id = id;
-                this.radius = 14;
-                this.lives = 12;
-                this.score = 0;
-                this.droids = 0;
-                this.thrusting = false;
-                this.fireCooldown = 0;
-                this.lastPushedBy = null;
-              }
-              respawn() {
-                if (this.lives > 0) {
-                  this.x = this.startX;
-                  this.y = this.startY;
-                  this.vx = 0;
-                  this.vy = 0;
-                  this.angle = [
-                    Math.PI / 4,
-                    (3 * Math.PI) / 4,
-                    (7 * Math.PI) / 4,
-                    (5 * Math.PI) / 4,
-                  ][this.id];
-                  this.lastPushedBy = null;
-                }
-              }
-              update() {
-                if (this.lives <= 0) return;
+      class EliminatorBase {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = WIDTH / 2 + (Math.random() * 130 - 65);
+          this.y = HEIGHT / 2 + (Math.random() * 100 - 50);
+          this.vx = (Math.random() - 0.5) * 0.32;
+          this.vy = (Math.random() - 0.5) * 0.32;
+          this.angle = Math.random() * Math.PI * 2;
+          this.angleSpeed = 0.004;
+          this.radius = 98;
+          this.changeTimer = 0;
+          this.destroyedTimer = 0;
+          this.tunnelStartX = 0;
+          this.tunnelStartY = 0;
+          this.tunnelEndX = 0;
+          this.tunnelEndY = 0;
+        }
+        updateTunnelLine() {
+          const tunnelAngle = this.angle + Math.PI * 0.78;
+          const startOffset = 20;
+          const tunnelLength = 85;
+          const relTx = Math.cos(tunnelAngle) * startOffset;
+          const relTy = Math.sin(tunnelAngle) * startOffset;
+          const relEx = relTx + Math.cos(tunnelAngle) * tunnelLength;
+          const relEy = relTy + Math.sin(tunnelAngle) * tunnelLength;
+          this.tunnelStartX = this.x + relTx;
+          this.tunnelStartY = this.y + relTy;
+          this.tunnelEndX = this.x + relEx;
+          this.tunnelEndY = this.y + relEy;
+          this.tunnelAngleDebug = tunnelAngle;
+        }
+        update() {
+          if (this.destroyedTimer > 0) {
+            this.destroyedTimer--;
+            return;
+          }
+          this.x += this.vx;
+          this.y += this.vy;
+          if (!rotationFrozen) this.angle += this.angleSpeed;
+          this.changeTimer--;
+          if (this.changeTimer <= 0) {
+            this.changeTimer = 180 + Math.random() * 360;
+            this.vx = (Math.random() - 0.5) * 0.42;
+            this.vy = (Math.random() - 0.5) * 0.42;
+            this.angleSpeed = Math.random() < 0.5 ? 0.004 : -0.004;
+          }
+          bounce(this, 115);
+          this.updateTunnelLine();
+        }
+        draw() {
+          if (this.destroyedTimer > 0) return;
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.fillStyle = "#004466";
+          ctx.strokeStyle = "#00aaff";
+          ctx.lineWidth = 6.5;
+          ctx.shadowBlur = 28;
+          ctx.shadowColor = "#00aaff";
+          ctx.beginPath();
+          ctx.moveTo(98, 0);
+          ctx.quadraticCurveTo(78, -62, 28, -85);
+          ctx.quadraticCurveTo(-32, -88, -82, -48);
+          ctx.quadraticCurveTo(-95, 32, -68, 78);
+          ctx.quadraticCurveTo(-22, 92, 52, 78);
+          ctx.quadraticCurveTo(88, 48, 98, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
 
-                // === MULTIPLAYER: Both players use D/F/J/K controls (no key contention across tabs) ===
-                let ctrl = CONTROLS[this.id];
-                if (multiplayer && this.id === 1) {
-                  ctrl = CONTROLS[0]; // Guest (magenta ship) uses same keys as host
-                }
+          ctx.strokeStyle = "#00aaff";
+          ctx.lineWidth = 42;
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
+          ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
+          ctx.stroke();
 
-                let input = keys;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 32;
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
+          ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
+          ctx.stroke();
+        }
+        isTunnelHit(bolt) {
+          if (this.destroyedTimer > 0) return false;
+          const dx = bolt.x - this.x,
+            dy = bolt.y - this.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > this.radius + 160) return false;
+          const lineDist = this.distanceToLineSegment(
+            bolt.x,
+            bolt.y,
+            this.tunnelStartX,
+            this.tunnelStartY,
+            this.tunnelEndX,
+            this.tunnelEndY,
+          );
+          return lineDist < 9;
+        }
+        distanceToLineSegment(px, py, x1, y1, x2, y2) {
+          const dx = x2 - x1,
+            dy = y2 - y1;
+          if (dx === 0 && dy === 0) return Math.hypot(px - x1, py - y1);
+          const t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+          const clampedT = Math.max(0, Math.min(1, t));
+          const projX = x1 + clampedT * dx;
+          const projY = y1 + clampedT * dy;
+          return Math.hypot(px - projX, py - projY);
+        }
+      }
 
-                if (multiplayer) {
-                  if (isHost && this.id === 1) {
-                    input = guestKeys || {};
-                  } else if (!isHost && this.id === 0) {
-                    input = {}; // Guest does not control host's ship
-                  }
-                }
-                // ====================================================================================
+      class EliminatorEnemy {
+        constructor(base) {
+          this.base = base;
+          this.reset();
+        }
+        reset() {
+          this.x = this.base.x;
+          this.y = this.base.y;
+          this.vx = 0;
+          this.vy = 0;
+          this.angle = 0;
+          this.state = "forming";
+          this.formTimer = 520;
+          this.radius = 13;
+          this.fireCooldown = 0;
+          this.lastPushedBy = null;
+          this.emergedTimer = 0;
+          this.shieldTimer = 0;
+          this.repelTimer = 0;
+        }
+        update(ships) {
+          if (this.state === "forming") {
+            this.formTimer--;
+            const tunnelAngle = this.base.angle + Math.PI * 0.78;
+            const tx = Math.cos(tunnelAngle) * 28;
+            const ty = Math.sin(tunnelAngle) * 28;
+            this.x = this.base.x + tx;
+            this.y = this.base.y + ty;
+            if (this.formTimer <= 0) {
+              this.state = "emerged";
+              this.emergedTimer = 80;
+              this.vx = Math.cos(tunnelAngle) * 2.8;
+              this.vy = Math.sin(tunnelAngle) * 2.8;
+              this.shieldTimer = 120;
+            }
+            return;
+          }
+          this.emergedTimer = Math.max(0, this.emergedTimer - 1);
+          if (this.shieldTimer > 0) this.shieldTimer--;
+          if (this.repelTimer > 0) this.repelTimer--;
 
-                if (input[ctrl.left]) this.angle -= 0.08;
-                if (input[ctrl.right]) this.angle += 0.08;
-                this.thrusting = input[ctrl.thrust] || false;
-                if (this.thrusting) {
-                  this.vx += Math.cos(this.angle) * 0.33;
-                  this.vy += Math.sin(this.angle) * 0.33;
-                }
-                this.vx *= 0.975;
-                this.vy *= 0.975;
-                this.x += this.vx;
-                this.y += this.vy;
-                bounce(this, 20);
-                if (this.x <= 20 || this.x >= WIDTH - 20)
-                  this.angle = Math.PI - this.angle;
-                if (this.y <= 20 || this.y >= HEIGHT - 20) this.angle = -this.angle;
-                this.angle =
-                  ((this.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-                if (this.fireCooldown > 0) this.fireCooldown--;
-                let myBoltCount = 0;
-                for (let i = 0; i < bolts.length; i++)
-                  if (bolts[i].owner === this.id) myBoltCount++;
-                if (input[ctrl.fire] && this.fireCooldown <= 0) {
-                  if (myBoltCount >= 3) {
-                    for (let i = 0; i < bolts.length; i++) {
-                      if (bolts[i].owner === this.id) {
-                        bolts.splice(i, 1);
-                        break;
-                      }
-                    }
-                  }
-                  this.fire();
-                  this.fireCooldown = 8;
-                }
-              }
-              fire() {
-                Sound.playLaser();
-                const speed = 9.5;
-                const bx = this.x + Math.cos(this.angle) * 22;
-                const by = this.y + Math.sin(this.angle) * 22;
-                bolts.push({
-                  x: bx,
-                  y: by,
-                  vx: this.vx + Math.cos(this.angle) * speed,
-                  vy: this.vy + Math.sin(this.angle) * speed,
-                  owner: this.id,
-                  life: 240,
-                  power: 1.15,
-                });
-              }
-              draw() {
-                if (this.lives <= 0) return;
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.strokeStyle = this.color;
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = this.color;
-                ctx.beginPath();
-                ctx.moveTo(22, 0);
-                ctx.lineTo(-14, -13);
-                ctx.lineTo(-8, 0);
-                ctx.lineTo(-14, 13);
-                ctx.closePath();
-                ctx.stroke();
-                if (this.thrusting) {
-                  ctx.strokeStyle = "#ff8800";
-                  ctx.shadowColor = "#ff8800";
-                  ctx.beginPath();
-                  ctx.moveTo(-12, -7);
-                  ctx.lineTo(-26 - Math.random() * 8, 0);
-                  ctx.lineTo(-12, 7);
-                  ctx.stroke();
-                }
-                ctx.restore();
-              }
+          let target = null;
+          let minDist = Infinity;
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            const d = Math.hypot(s.x - this.x, s.y - this.y);
+            if (d < minDist) {
+              minDist = d;
+              target = s;
+            }
+          }
+
+          if (target) {
+            const a = Math.atan2(target.y - this.y, target.x - this.x);
+
+            if (this.repelTimer > 0) {
+              let diff = a - this.angle;
+              diff = ((diff + Math.PI) % (Math.PI * 2)) - Math.PI;
+              this.angle += diff * 0.007;
+            } else {
+              this.angle = a;
             }
 
-            class EliminatorBase {
-              constructor() {
-                this.reset();
-              }
-              reset() {
-                this.x = WIDTH / 2 + (Math.random() * 130 - 65);
-                this.y = HEIGHT / 2 + (Math.random() * 100 - 50);
-                this.vx = (Math.random() - 0.5) * 0.32;
-                this.vy = (Math.random() - 0.5) * 0.32;
-                this.angle = Math.random() * Math.PI * 2;
-                this.angleSpeed = 0.004;
-                this.radius = 98;
-                this.changeTimer = 0;
-                this.destroyedTimer = 0;
-                this.tunnelStartX = 0;
-                this.tunnelStartY = 0;
-                this.tunnelEndX = 0;
-                this.tunnelEndY = 0;
-              }
-              updateTunnelLine() {
-                const tunnelAngle = this.angle + Math.PI * 0.78;
-                const startOffset = 20;
-                const tunnelLength = 85;
-                const relTx = Math.cos(tunnelAngle) * startOffset;
-                const relTy = Math.sin(tunnelAngle) * startOffset;
-                const relEx = relTx + Math.cos(tunnelAngle) * tunnelLength;
-                const relEy = relTy + Math.sin(tunnelAngle) * tunnelLength;
-                this.tunnelStartX = this.x + relTx;
-                this.tunnelStartY = this.y + relTy;
-                this.tunnelEndX = this.x + relEx;
-                this.tunnelEndY = this.y + relEy;
-                this.tunnelAngleDebug = tunnelAngle;
-              }
-              update() {
-                if (this.destroyedTimer > 0) {
-                  this.destroyedTimer--;
-                  return;
-                }
-                this.x += this.vx;
-                this.y += this.vy;
-                if (!rotationFrozen) this.angle += this.angleSpeed;
-                this.changeTimer--;
-                if (this.changeTimer <= 0) {
-                  this.changeTimer = 180 + Math.random() * 360;
-                  this.vx = (Math.random() - 0.5) * 0.42;
-                  this.vy = (Math.random() - 0.5) * 0.42;
-                  this.angleSpeed = Math.random() < 0.5 ? 0.004 : -0.004;
-                }
-                bounce(this, 115);
-                this.updateTunnelLine();
-              }
-              draw() {
-                if (this.destroyedTimer > 0) return;
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.fillStyle = "#004466";
-                ctx.strokeStyle = "#00aaff";
-                ctx.lineWidth = 6.5;
-                ctx.shadowBlur = 28;
-                ctx.shadowColor = "#00aaff";
-                ctx.beginPath();
-                ctx.moveTo(98, 0);
-                ctx.quadraticCurveTo(78, -62, 28, -85);
-                ctx.quadraticCurveTo(-32, -88, -82, -48);
-                ctx.quadraticCurveTo(-95, 32, -68, 78);
-                ctx.quadraticCurveTo(-22, 92, 52, 78);
-                ctx.quadraticCurveTo(88, 48, 98, 0);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                ctx.restore();
+            let attraction = 0.09 + round * 0.012;
+            if (this.repelTimer > 0) attraction *= 0.1;
 
-                ctx.strokeStyle = "#00aaff";
-                ctx.lineWidth = 42;
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
-                ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
-                ctx.stroke();
+            this.vx += Math.cos(a) * attraction;
+            this.vy += Math.sin(a) * attraction;
+          }
 
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 32;
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
-                ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
-                ctx.stroke();
-              }
-              isTunnelHit(bolt) {
-                if (this.destroyedTimer > 0) return false;
-                const dx = bolt.x - this.x,
-                  dy = bolt.y - this.y;
-                const dist = Math.hypot(dx, dy);
-                if (dist > this.radius + 160) return false;
-                const lineDist = this.distanceToLineSegment(
-                  bolt.x,
-                  bolt.y,
-                  this.tunnelStartX,
-                  this.tunnelStartY,
-                  this.tunnelEndX,
-                  this.tunnelEndY,
-                );
-                return lineDist < 9;
-              }
-              distanceToLineSegment(px, py, x1, y1, x2, y2) {
-                const dx = x2 - x1,
-                  dy = y2 - y1;
-                if (dx === 0 && dy === 0) return Math.hypot(px - x1, py - y1);
-                const t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
-                const clampedT = Math.max(0, Math.min(1, t));
-                const projX = x1 + clampedT * dx;
-                const projY = y1 + clampedT * dy;
-                return Math.hypot(px - projX, py - projY);
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.94;
+          this.vy *= 0.94;
+          bounce(this, 18);
+
+          if (target) {
+            const a = Math.atan2(target.y - this.y, target.x - this.x);
+            let angleDiff = Math.abs(
+              ((a - this.angle + Math.PI) % (Math.PI * 2)) - Math.PI,
+            );
+            if (
+              angleDiff < 0.65 &&
+              Math.random() < 0.019 + round * 0.008 &&
+              this.fireCooldown <= 0
+            ) {
+              this.fireFireball(target);
+              this.fireCooldown = 42;
+            }
+          }
+
+          if (
+            this.state === "emerged" &&
+            this.shieldTimer <= 0 &&
+            Math.hypot(this.x - this.base.x, this.y - this.base.y) <
+              this.base.radius + 55
+          ) {
+            createExplosion(this.x, this.y, true);
+            if (this.lastPushedBy !== null) {
+              const p = ships[this.lastPushedBy];
+              if (p && p.lives > 0) {
+                p.score += 900 + round * 250;
+                p.droids += 2;
               }
             }
+            this.reset();
+          }
+        }
+        fireFireball(target) {
+          if (!target) return;
+          const dx = target.x - this.x,
+            dy = target.y - this.y;
+          const len = Math.hypot(dx, dy) || 1;
+          fireballs.push({
+            x: this.x,
+            y: this.y,
+            vx: (dx / len) * 6.6,
+            vy: (dy / len) * 6.6,
+            life: 58,
+            color: "#ff4400",
+          });
+          Sound.playEnemyLaser();
+        }
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          if (this.shieldTimer > 0) {
+            ctx.strokeStyle = "#00ffff";
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = "#00ffff";
+            ctx.globalAlpha = 0.6 + Math.sin(Date.now() / 80) * 0.3;
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius + 12, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+          if (this.state === "forming") {
+            const prog = Math.max(0, 1 - this.formTimer / 460);
+            ctx.strokeStyle = "#ff2222";
+            ctx.lineWidth = 3.5;
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = "#ff2222";
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+              const a = (i * Math.PI) / 3;
+              ctx.lineTo(Math.cos(a) * 22 * prog, Math.sin(a) * 22 * prog);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle = "#ff8800";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(16 * prog, 0);
+            ctx.lineTo(-11 * prog, -11 * prog);
+            ctx.lineTo(-7 * prog, 0);
+            ctx.lineTo(-11 * prog, 11 * prog);
+            ctx.stroke();
+          } else {
+            ctx.strokeStyle = "#ff2222";
+            ctx.lineWidth = 3.5;
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = "#ff2222";
+            ctx.beginPath();
+            ctx.moveTo(20, 0);
+            ctx.lineTo(-13, -13);
+            ctx.lineTo(-9, 0);
+            ctx.lineTo(-13, 13);
+            ctx.closePath();
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
 
-            class EliminatorEnemy {
-              constructor(base) {
-                this.base = base;
-                this.reset();
+      class Fighter {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.vx = (Math.random() - 0.5) * 1.4;
+          this.vy = (Math.random() - 0.5) * 1.4;
+          this.angle = 0;
+          this.radius = 9;
+          this.fireCooldown = 0;
+          this.homingRange = 240;
+          this.lastPushedBy = null;
+        }
+        update(ships) {
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            const dx = this.x - s.x,
+              dy = this.y - s.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 58 && dist > 0) {
+              this.vx += (dx / dist) * 1.05;
+              this.vy += (dy / dist) * 1.05;
+            }
+          }
+          for (let f of fighters) {
+            if (f === this) continue;
+            const dx = this.x - f.x,
+              dy = this.y - f.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 58 && dist > 0) {
+              this.vx += (dx / dist) * 1.05;
+              this.vy += (dy / dist) * 1.05;
+            }
+          }
+          let target = null;
+          let minDist = Infinity;
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            const d = Math.hypot(s.x - this.x, s.y - this.y);
+            if (d < minDist) {
+              minDist = d;
+              target = s;
+            }
+          }
+          if (target && minDist < this.homingRange) {
+            const a = Math.atan2(target.y - this.y, target.x - this.x);
+            this.vx += Math.cos(a) * 0.16;
+            this.vy += Math.sin(a) * 0.16;
+            this.angle = a;
+          } else {
+            if (Math.random() < 0.12) {
+              this.vx += (Math.random() - 0.5) * 1.2;
+              this.vy += (Math.random() - 0.5) * 1.2;
+            }
+            this.angle = Math.atan2(this.vy, this.vx);
+          }
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.94;
+          this.vy *= 0.94;
+          bounce(this, 15);
+          if (this.fireCooldown > 0) this.fireCooldown--;
+          if (
+            Math.random() < 0.045 &&
+            this.fireCooldown <= 0 &&
+            target &&
+            minDist < 210 &&
+            minDist > 65
+          ) {
+            const dx = target.x - this.x,
+              dy = target.y - this.y;
+            const len = Math.hypot(dx, dy) || 1;
+            enemyBolts.push({
+              x: this.x,
+              y: this.y,
+              vx: (dx / len) * 6.2,
+              vy: (dy / len) * 6.2,
+              life: 75,
+              power: 1.1,
+            });
+            this.fireCooldown = 38;
+            Sound.playEnemyLaser();
+          }
+        }
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.strokeStyle = "#ff4400";
+          ctx.lineWidth = 2.8;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#ff8800";
+          ctx.beginPath();
+          ctx.moveTo(14, 0);
+          ctx.lineTo(-10, -10);
+          ctx.lineTo(-6, 0);
+          ctx.lineTo(-10, 10);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function spawnBaseFragments(x, y) {
+        for (let i = 0; i < 18; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 3.5 + Math.random() * 5.5;
+          baseFragments.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            angle: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.28,
+            size: 14 + Math.random() * 22,
+            life: 110 + Math.random() * 40,
+            points: Math.random() < 0.5 ? 4 : 5,
+          });
+        }
+      }
+      function createShips(count) {
+        ships = [];
+        for (let i = 0; i < count; i++) {
+          const pos = START_POS[i % 4];
+          ships.push(new Ship(pos.x, pos.y, PLAYER_COLORS[i], i));
+        }
+      }
+      function initGame(players) {
+        numPlayers = Math.max(1, Math.min(4, players));
+        createShips(numPlayers);
+        base = new EliminatorBase();
+        eliminator = new EliminatorEnemy(base);
+        bolts = [];
+        enemyBolts = [];
+        fireballs = [];
+        fighters = [];
+        baseFragments = [];
+        round = 1;
+        lastExplosionReason = "none";
+        document.getElementById("hud").style.display = "flex";
+        updateHUD();
+      }
+      function updateHUD() {
+        const hud = document.getElementById("hud");
+        let html = "";
+        for (let i = 0; i < ships.length; i++) {
+          const s = ships[i];
+          if (multiplayer && ships.length === 2) {
+            // Always show both players in 2P multiplayer (even if one has 0 lives)
+            html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
+          } else if (s.lives > 0) {
+            html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
+          }
+        }
+        hud.innerHTML = html;
+      }
+
+      function updateBorderColor() {
+        const canvasEl = document.getElementById("canvas");
+        if (!multiplayer || ships.length < 2 || !canvasEl) {
+          canvasEl.style.borderColor = "#00f";
+          canvasEl.style.boxShadow = "0 0 40px #00f";
+          return;
+        }
+
+        // Find the ship with the highest score
+        let leader = ships[0];
+        for (let s of ships) {
+          if (s.score > leader.score) leader = s;
+        }
+
+        canvasEl.style.borderColor = leader.color;
+        canvasEl.style.boxShadow = `0 0 40px ${leader.color}`;
+      }
+
+      function createExplosion(x, y, small = false) {
+        for (let i = 0; i < (small ? 18 : 45); i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = small ? 3 + Math.random() * 4 : 6 + Math.random() * 7;
+          fireballs.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: small ? 24 : 42,
+            color: ["#ff0000", "#ffff00", "#ff8800", "#ffffff"][
+              Math.floor(Math.random() * 4)
+            ],
+          });
+        }
+        Sound.playExplode();
+      }
+      function spawnFighter() {
+        if (fighters.length >= 3) return;
+        const angle = Math.random() * Math.PI * 2;
+        const dist = base.radius + 38;
+        const fx = base.x + Math.cos(angle) * dist;
+        const fy = base.y + Math.sin(angle) * dist;
+        const f = new Fighter(fx, fy);
+        f.vx = Math.cos(angle) * 2.2;
+        f.vy = Math.sin(angle) * 2.2;
+        fighters.push(f);
+      }
+
+      function checkCollisions() {
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          for (let j = fighters.length - 1; j >= 0; j--) {
+            const f = fighters[j];
+            if (Math.hypot(b.x - f.x, b.y - f.y) < f.radius + 9) {
+              f.vx += b.vx * b.power * 1.45;
+              f.vy += b.vy * b.power * 1.45;
+              f.lastPushedBy = b.owner;
+              const ownerShip = ships[b.owner];
+              if (ownerShip && ownerShip.lives > 0) {
+                ownerShip.score += 200 + round * 50;
+                ownerShip.droids++;
               }
-              reset() {
-                this.x = this.base.x;
-                this.y = this.base.y;
-                this.vx = 0;
-                this.vy = 0;
-                this.angle = 0;
-                this.state = "forming";
-                this.formTimer = 520;
-                this.radius = 13;
-                this.fireCooldown = 0;
-                this.lastPushedBy = null;
-                this.emergedTimer = 0;
-                this.shieldTimer = 0;
-                this.repelTimer = 0;
-              }
-              update(ships) {
-                if (this.state === "forming") {
-                  this.formTimer--;
-                  const tunnelAngle = this.base.angle + Math.PI * 0.78;
-                  const tx = Math.cos(tunnelAngle) * 28;
-                  const ty = Math.sin(tunnelAngle) * 28;
-                  this.x = this.base.x + tx;
-                  this.y = this.base.y + ty;
-                  if (this.formTimer <= 0) {
-                    this.state = "emerged";
-                    this.emergedTimer = 80;
-                    this.vx = Math.cos(tunnelAngle) * 2.8;
-                    this.vy = Math.sin(tunnelAngle) * 2.8;
-                    this.shieldTimer = 120;
-                  }
-                  return;
+              bolts.splice(i, 1);
+              Sound.playHit();
+              break;
+            }
+          }
+        }
+
+        // === NEW: Player bolts hit & push other players (multiplayer only) ===
+        if (multiplayer && ships.length === 2) {
+          for (let i = bolts.length - 1; i >= 0; i--) {
+            const b = bolts[i];
+            for (let s of ships) {
+              if (s.id === b.owner || s.lives <= 0) continue;
+              if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 9) {
+                s.vx += b.vx * b.power * 1.3;
+                s.vy += b.vy * b.power * 1.3;
+                s.lastPushedBy = b.owner;
+                const shooter = ships[b.owner];
+                if (shooter && shooter.lives > 0) {
+                  shooter.score += 150 + round * 30;
+                  shooter.droids++;
                 }
-                this.emergedTimer = Math.max(0, this.emergedTimer - 1);
-                if (this.shieldTimer > 0) this.shieldTimer--;
-                if (this.repelTimer > 0) this.repelTimer--;
-
-                let target = null;
-                let minDist = Infinity;
-                for (let s of ships) {
-                  if (s.lives <= 0) continue;
-                  const d = Math.hypot(s.x - this.x, s.y - this.y);
-                  if (d < minDist) {
-                    minDist = d;
-                    target = s;
-                  }
-                }
-
-                if (target) {
-                  const a = Math.atan2(target.y - this.y, target.x - this.x);
-
-                  if (this.repelTimer > 0) {
-                    let diff = a - this.angle;
-                    diff = ((diff + Math.PI) % (Math.PI * 2)) - Math.PI;
-                    this.angle += diff * 0.007;
-                  } else {
-                    this.angle = a;
-                  }
-
-                  let attraction = 0.09 + round * 0.012;
-                  if (this.repelTimer > 0) attraction *= 0.1;
-
-                  this.vx += Math.cos(a) * attraction;
-                  this.vy += Math.sin(a) * attraction;
-                }
-
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vx *= 0.94;
-                this.vy *= 0.94;
-                bounce(this, 18);
-
-                if (target) {
-                  const a = Math.atan2(target.y - this.y, target.x - this.x);
-                  let angleDiff = Math.abs(
-                    ((a - this.angle + Math.PI) % (Math.PI * 2)) - Math.PI,
-                  );
-                  if (
-                    angleDiff < 0.65 &&
-                    Math.random() < 0.019 + round * 0.008 &&
-                    this.fireCooldown <= 0
-                  ) {
-                    this.fireFireball(target);
-                    this.fireCooldown = 42;
-                  }
-                }
-
-                if (
-                  this.state === "emerged" &&
-                  this.shieldTimer <= 0 &&
-                  Math.hypot(this.x - this.base.x, this.y - this.base.y) <
-                    this.base.radius + 55
-                ) {
-                  createExplosion(this.x, this.y, true);
-                  if (this.lastPushedBy !== null) {
-                    const p = ships[this.lastPushedBy];
-                    if (p && p.lives > 0) {
-                      p.score += 900 + round * 250;
-                      p.droids += 2;
-                    }
-                  }
-                  this.reset();
-                }
-              }
-              fireFireball(target) {
-                if (!target) return;
-                const dx = target.x - this.x,
-                  dy = target.y - this.y;
-                const len = Math.hypot(dx, dy) || 1;
-                fireballs.push({
-                  x: this.x,
-                  y: this.y,
-                  vx: (dx / len) * 6.6,
-                  vy: (dy / len) * 6.6,
-                  life: 58,
-                  color: "#ff4400",
-                });
-                Sound.playEnemyLaser();
-              }
-              draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                if (this.shieldTimer > 0) {
-                  ctx.strokeStyle = "#00ffff";
-                  ctx.lineWidth = 4;
-                  ctx.shadowBlur = 25;
-                  ctx.shadowColor = "#00ffff";
-                  ctx.globalAlpha = 0.6 + Math.sin(Date.now() / 80) * 0.3;
-                  ctx.beginPath();
-                  ctx.arc(0, 0, this.radius + 12, 0, Math.PI * 2);
-                  ctx.stroke();
-                  ctx.globalAlpha = 1;
-                }
-                if (this.state === "forming") {
-                  const prog = Math.max(0, 1 - this.formTimer / 460);
-                  ctx.strokeStyle = "#ff2222";
-                  ctx.lineWidth = 3.5;
-                  ctx.shadowBlur = 18;
-                  ctx.shadowColor = "#ff2222";
-                  ctx.beginPath();
-                  for (let i = 0; i < 6; i++) {
-                    const a = (i * Math.PI) / 3;
-                    ctx.lineTo(Math.cos(a) * 22 * prog, Math.sin(a) * 22 * prog);
-                  }
-                  ctx.closePath();
-                  ctx.stroke();
-                  ctx.strokeStyle = "#ff8800";
-                  ctx.lineWidth = 3;
-                  ctx.beginPath();
-                  ctx.moveTo(16 * prog, 0);
-                  ctx.lineTo(-11 * prog, -11 * prog);
-                  ctx.lineTo(-7 * prog, 0);
-                  ctx.lineTo(-11 * prog, 11 * prog);
-                  ctx.stroke();
-                } else {
-                  ctx.strokeStyle = "#ff2222";
-                  ctx.lineWidth = 3.5;
-                  ctx.shadowBlur = 18;
-                  ctx.shadowColor = "#ff2222";
-                  ctx.beginPath();
-                  ctx.moveTo(20, 0);
-                  ctx.lineTo(-13, -13);
-                  ctx.lineTo(-9, 0);
-                  ctx.lineTo(-13, 13);
-                  ctx.closePath();
-                  ctx.stroke();
-                }
-                ctx.restore();
+                bolts.splice(i, 1);
+                Sound.playHit();
+                updateHUD();
+                break;
               }
             }
+          }
+        }
+        // =====================================================================
+        for (let i = enemyBolts.length - 1; i >= 0; i--) {
+          const b = enemyBolts[i];
+          let hit = false;
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 8) {
+              s.vx += b.vx * b.power * 1.1;
+              s.vy += b.vy * b.power * 1.1;
+              hit = true;
+              break;
+            }
+          }
+          if (hit) enemyBolts.splice(i, 1);
+        }
 
-            class Fighter {
-              constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.vx = (Math.random() - 0.5) * 1.4;
-                this.vy = (Math.random() - 0.5) * 1.4;
-                this.angle = 0;
-                this.radius = 9;
-                this.fireCooldown = 0;
-                this.homingRange = 240;
-                this.lastPushedBy = null;
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          if (
+            eliminator &&
+            eliminator.state === "emerged" &&
+            eliminator.shieldTimer <= 0
+          ) {
+            if (
+              Math.hypot(b.x - eliminator.x, b.y - eliminator.y) <
+              eliminator.radius + 9
+            ) {
+              const dx = eliminator.x - b.x;
+              const dy = eliminator.y - b.y;
+              const len = Math.hypot(dx, dy) || 1;
+              eliminator.vx = (dx / len) * 6.2;
+              eliminator.vy = (dy / len) * 6.2;
+              eliminator.angle = Math.atan2(eliminator.vy, eliminator.vx);
+              eliminator.repelTimer = 160;
+              const ownerShip = ships[b.owner];
+              if (ownerShip && ownerShip.lives > 0) {
+                ownerShip.score += 125 + round * 40;
+                ownerShip.droids++;
               }
-              update(ships) {
-                for (let s of ships) {
-                  if (s.lives <= 0) continue;
-                  const dx = this.x - s.x,
-                    dy = this.y - s.y;
-                  const dist = Math.hypot(dx, dy);
-                  if (dist < 58 && dist > 0) {
-                    this.vx += (dx / dist) * 1.05;
-                    this.vy += (dy / dist) * 1.05;
-                  }
-                }
-                for (let f of fighters) {
-                  if (f === this) continue;
-                  const dx = this.x - f.x,
-                    dy = this.y - f.y;
-                  const dist = Math.hypot(dx, dy);
-                  if (dist < 58 && dist > 0) {
-                    this.vx += (dx / dist) * 1.05;
-                    this.vy += (dy / dist) * 1.05;
-                  }
-                }
-                let target = null;
-                let minDist = Infinity;
-                for (let s of ships) {
-                  if (s.lives <= 0) continue;
-                  const d = Math.hypot(s.x - this.x, s.y - this.y);
-                  if (d < minDist) {
-                    minDist = d;
-                    target = s;
-                  }
-                }
-                if (target && minDist < this.homingRange) {
-                  const a = Math.atan2(target.y - this.y, target.x - this.x);
-                  this.vx += Math.cos(a) * 0.16;
-                  this.vy += Math.sin(a) * 0.16;
-                  this.angle = a;
-                } else {
-                  if (Math.random() < 0.12) {
-                    this.vx += (Math.random() - 0.5) * 1.2;
-                    this.vy += (Math.random() - 0.5) * 1.2;
-                  }
-                  this.angle = Math.atan2(this.vy, this.vx);
-                }
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vx *= 0.94;
-                this.vy *= 0.94;
-                bounce(this, 15);
-                if (this.fireCooldown > 0) this.fireCooldown--;
-                if (
-                  Math.random() < 0.045 &&
-                  this.fireCooldown <= 0 &&
-                  target &&
-                  minDist < 210 &&
-                  minDist > 65
-                ) {
-                  const dx = target.x - this.x,
-                    dy = target.y - this.y;
-                  const len = Math.hypot(dx, dy) || 1;
-                  enemyBolts.push({
-                    x: this.x,
-                    y: this.y,
-                    vx: (dx / len) * 6.2,
-                    vy: (dy / len) * 6.2,
-                    life: 75,
-                    power: 1.1,
-                  });
-                  this.fireCooldown = 38;
-                  Sound.playEnemyLaser();
-                }
-              }
-              draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.strokeStyle = "#ff4400";
-                ctx.lineWidth = 2.8;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = "#ff8800";
-                ctx.beginPath();
-                ctx.moveTo(14, 0);
-                ctx.lineTo(-10, -10);
-                ctx.lineTo(-6, 0);
-                ctx.lineTo(-10, 10);
-                ctx.closePath();
-                ctx.stroke();
-                ctx.restore();
-              }
+              bolts.splice(i, 1);
+              Sound.playHit();
+              continue;
             }
+          }
+        }
 
-            function spawnBaseFragments(x, y) {
-              for (let i = 0; i < 18; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 3.5 + Math.random() * 5.5;
-                baseFragments.push({
-                  x: x,
-                  y: y,
-                  vx: Math.cos(angle) * speed,
-                  vy: Math.sin(angle) * speed,
-                  angle: Math.random() * Math.PI * 2,
-                  rotSpeed: (Math.random() - 0.5) * 0.28,
-                  size: 14 + Math.random() * 22,
-                  life: 110 + Math.random() * 40,
-                  points: Math.random() < 0.5 ? 4 : 5,
-                });
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          if (base.destroyedTimer === 0 && base.isTunnelHit(b)) {
+            lastExplosionReason = `Player bolt #${b.owner} ENTERED TUNNEL at (${b.x.toFixed(0)},${b.y.toFixed(0)})`;
+            spawnBaseFragments(base.x, base.y);
+            createExplosion(base.x, base.y, false);
+            Sound.playBaseExplode();
+            const ownerShip = ships[b.owner];
+            if (ownerShip && ownerShip.lives > 0) {
+              ownerShip.score += 2000 + round * 300;
+              ownerShip.droids += 3;
+            }
+            base.destroyedTimer = 240;
+            bolts.splice(i, 1);
+            continue;
+          }
+        }
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          if (base.destroyedTimer === 0) {
+            const dx = b.x - base.x,
+              dy = b.y - base.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < base.radius + 14) {
+              if (!base.isTunnelHit(b)) {
+                bolts.splice(i, 1);
+                Sound.playHit();
               }
             }
-            function createShips(count) {
-              ships = [];
-              for (let i = 0; i < count; i++) {
-                const pos = START_POS[i % 4];
-                ships.push(new Ship(pos.x, pos.y, PLAYER_COLORS[i], i));
+          }
+        }
+        for (let i = fireballs.length - 1; i >= 0; i--) {
+          const f = fireballs[i];
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            if (Math.hypot(f.x - s.x, f.y - s.y) < s.radius + 7) {
+              s.lives--;
+              fireballs.splice(i, 1);
+              s.respawn();
+              updateHUD();
+              break;
+            }
+          }
+        }
+        for (let i = fighters.length - 1; i >= 0; i--) {
+          const f = fighters[i];
+          if (Math.hypot(f.x - base.x, f.y - base.y) < base.radius + 8) {
+            if (f.lastPushedBy !== null) {
+              createExplosion(f.x, f.y, true);
+              const p = ships[f.lastPushedBy];
+              if (p && p.lives > 0) {
+                p.score += 500 + round * 150;
+                p.droids++;
               }
             }
-            function initGame(players) {
-              numPlayers = Math.max(1, Math.min(4, players));
-              createShips(numPlayers);
-              base = new EliminatorBase();
-              eliminator = new EliminatorEnemy(base);
-              bolts = [];
-              enemyBolts = [];
-              fireballs = [];
-              fighters = [];
-              baseFragments = [];
-              round = 1;
-              lastExplosionReason = "none";
-              document.getElementById("hud").style.display = "flex";
+            fighters.splice(i, 1);
+            continue;
+          }
+        }
+        if (eliminator && eliminator.state === "emerged") {
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            if (
+              Math.hypot(eliminator.x - s.x, eliminator.y - s.y) <
+              eliminator.radius + s.radius + 4
+            ) {
+              s.lives--;
+              s.respawn();
+              eliminator.reset();
               updateHUD();
             }
-            function updateHUD() {
-              const hud = document.getElementById("hud");
-              let html = "";
-              for (let i = 0; i < ships.length; i++) {
-                const s = ships[i];
-                if (multiplayer && ships.length === 2) {
-                  // Always show both players in 2P multiplayer (even if one has 0 lives)
-                  html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
-                } else if (s.lives > 0) {
-                  html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
-                }
-              }
-              hud.innerHTML = html;
-            }
-
-            function updateBorderColor() {
-              const canvasEl = document.getElementById("canvas");
-              if (!multiplayer || ships.length < 2 || !canvasEl) {
-                canvasEl.style.borderColor = "#00f";
-                canvasEl.style.boxShadow = "0 0 40px #00f";
-                return;
-              }
-
-              // Find the ship with the highest score
-              let leader = ships[0];
-              for (let s of ships) {
-                if (s.score > leader.score) leader = s;
-              }
-
-              canvasEl.style.borderColor = leader.color;
-              canvasEl.style.boxShadow = `0 0 40px ${leader.color}`;
-            }
-
-            function createExplosion(x, y, small = false) {
-              for (let i = 0; i < (small ? 18 : 45); i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = small ? 3 + Math.random() * 4 : 6 + Math.random() * 7;
-                fireballs.push({
-                  x: x,
-                  y: y,
-                  vx: Math.cos(angle) * speed,
-                  vy: Math.sin(angle) * speed,
-                  life: small ? 24 : 42,
-                  color: ["#ff0000", "#ffff00", "#ff8800", "#ffffff"][
-                    Math.floor(Math.random() * 4)
-                  ],
-                });
-              }
-              Sound.playExplode();
-            }
-            function spawnFighter() {
-              if (fighters.length >= 3) return;
-              const angle = Math.random() * Math.PI * 2;
-              const dist = base.radius + 38;
-              const fx = base.x + Math.cos(angle) * dist;
-              const fy = base.y + Math.sin(angle) * dist;
-              const f = new Fighter(fx, fy);
-              f.vx = Math.cos(angle) * 2.2;
-              f.vy = Math.sin(angle) * 2.2;
-              fighters.push(f);
-            }
-
-            function checkCollisions() {
-              for (let i = bolts.length - 1; i >= 0; i--) {
-                const b = bolts[i];
-                for (let j = fighters.length - 1; j >= 0; j--) {
-                  const f = fighters[j];
-                  if (Math.hypot(b.x - f.x, b.y - f.y) < f.radius + 9) {
-                    f.vx += b.vx * b.power * 1.45;
-                    f.vy += b.vy * b.power * 1.45;
-                    f.lastPushedBy = b.owner;
-                    const ownerShip = ships[b.owner];
-                    if (ownerShip && ownerShip.lives > 0) {
-                      ownerShip.score += 200 + round * 50;
-                      ownerShip.droids++;
-                    }
-                    bolts.splice(i, 1);
-                    Sound.playHit();
-                    break;
-                  }
-                }
-              }
-
-              // === NEW: Player bolts hit & push other players (multiplayer only) ===
-              if (multiplayer && ships.length === 2) {
-                for (let i = bolts.length - 1; i >= 0; i--) {
-                  const b = bolts[i];
-                  for (let s of ships) {
-                    if (s.id === b.owner || s.lives <= 0) continue;
-                    if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 9) {
-                      s.vx += b.vx * b.power * 1.3;
-                      s.vy += b.vy * b.power * 1.3;
-                      s.lastPushedBy = b.owner;
-                      const shooter = ships[b.owner];
-                      if (shooter && shooter.lives > 0) {
-                        shooter.score += 150 + round * 30;
-                        shooter.droids++;
-                      }
-                      bolts.splice(i, 1);
-                      Sound.playHit();
-                      updateHUD();
-                      break;
-                    }
-                  }
-                }
-              }
-              // =====================================================================
-              for (let i = enemyBolts.length - 1; i >= 0; i--) {
-                const b = enemyBolts[i];
-                let hit = false;
-                for (let s of ships) {
-                  if (s.lives <= 0) continue;
-                  if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 8) {
-                    s.vx += b.vx * b.power * 1.1;
-                    s.vy += b.vy * b.power * 1.1;
-                    hit = true;
-                    break;
-                  }
-                }
-                if (hit) enemyBolts.splice(i, 1);
-              }
-
-              for (let i = bolts.length - 1; i >= 0; i--) {
-                const b = bolts[i];
-                if (
-                  eliminator &&
-                  eliminator.state === "emerged" &&
-                  eliminator.shieldTimer <= 0
-                ) {
-                  if (
-                    Math.hypot(b.x - eliminator.x, b.y - eliminator.y) <
-                    eliminator.radius + 9
-                  ) {
-                    const dx = eliminator.x - b.x;
-                    const dy = eliminator.y - b.y;
-                    const len = Math.hypot(dx, dy) || 1;
-                    eliminator.vx = (dx / len) * 6.2;
-                    eliminator.vy = (dy / len) * 6.2;
-                    eliminator.angle = Math.atan2(eliminator.vy, eliminator.vx);
-                    eliminator.repelTimer = 160;
-                    const ownerShip = ships[b.owner];
-                    if (ownerShip && ownerShip.lives > 0) {
-                      ownerShip.score += 125 + round * 40;
-                      ownerShip.droids++;
-                    }
-                    bolts.splice(i, 1);
-                    Sound.playHit();
-                    continue;
-                  }
-                }
-              }
-
-              for (let i = bolts.length - 1; i >= 0; i--) {
-                const b = bolts[i];
-                if (base.destroyedTimer === 0 && base.isTunnelHit(b)) {
-                  lastExplosionReason = `Player bolt #${b.owner} ENTERED TUNNEL at (${b.x.toFixed(0)},${b.y.toFixed(0)})`;
-                  spawnBaseFragments(base.x, base.y);
-                  createExplosion(base.x, base.y, false);
-                  Sound.playBaseExplode();
-                  const ownerShip = ships[b.owner];
-                  if (ownerShip && ownerShip.lives > 0) {
-                    ownerShip.score += 2000 + round * 300;
-                    ownerShip.droids += 3;
-                  }
-                  base.destroyedTimer = 240;
-                  bolts.splice(i, 1);
-                  continue;
-                }
-              }
-              for (let i = bolts.length - 1; i >= 0; i--) {
-                const b = bolts[i];
-                if (base.destroyedTimer === 0) {
-                  const dx = b.x - base.x,
-                    dy = b.y - base.y;
-                  const dist = Math.hypot(dx, dy);
-                  if (dist < base.radius + 14) {
-                    if (!base.isTunnelHit(b)) {
-                      bolts.splice(i, 1);
-                      Sound.playHit();
-                    }
-                  }
-                }
-              }
-              for (let i = fireballs.length - 1; i >= 0; i--) {
-                const f = fireballs[i];
-                for (let s of ships) {
-                  if (s.lives <= 0) continue;
-                  if (Math.hypot(f.x - s.x, f.y - s.y) < s.radius + 7) {
-                    s.lives--;
-                    fireballs.splice(i, 1);
-                    s.respawn();
-                    updateHUD();
-                    break;
-                  }
-                }
-              }
-              for (let i = fighters.length - 1; i >= 0; i--) {
-                const f = fighters[i];
-                if (Math.hypot(f.x - base.x, f.y - base.y) < base.radius + 8) {
-                  if (f.lastPushedBy !== null) {
-                    createExplosion(f.x, f.y, true);
-                    const p = ships[f.lastPushedBy];
-                    if (p && p.lives > 0) {
-                      p.score += 500 + round * 150;
-                      p.droids++;
-                    }
-                  }
-                  fighters.splice(i, 1);
-                  continue;
-                }
-              }
-              if (eliminator && eliminator.state === "emerged") {
-                for (let s of ships) {
-                  if (s.lives <= 0) continue;
-                  if (
-                    Math.hypot(eliminator.x - s.x, eliminator.y - s.y) <
-                    eliminator.radius + s.radius + 4
-                  ) {
-                    s.lives--;
-                    s.respawn();
-                    eliminator.reset();
-                    updateHUD();
-                  }
-                }
-              }
-              for (let s of ships) {
-                if (s.lives <= 0) continue;
-                if (
-                  base.destroyedTimer === 0 &&
-                  Math.hypot(s.x - base.x, s.y - base.y) < base.radius + s.radius
-                ) {
-                  // Award points if another player drove this ship into the base
-                  if (s.lastPushedBy !== null && s.lastPushedBy !== s.id) {
-                    const pusher = ships[s.lastPushedBy];
-                    if (pusher && pusher.lives > 0) {
-                      pusher.score += 600 + round * 120;
-                      pusher.droids += 2;
-                    }
-                  }
-                  s.lives--;
-                  s.lastPushedBy = null;
-                  s.respawn();
-                  updateHUD();
-                }
-                if (s.score >= s.lives * 6000 + 6000) {
-                  s.lives++;
-                  updateHUD();
-                }
-              }
-              const alive = ships.filter((s) => s.lives > 0).length;
-              if (alive === 0 && state === "playing") state = "gameover";
-
-              if (multiplayer) updateBorderColor(); // Dynamic border for leading player
-            }
-
-            function update() {
-              if (state !== "playing") return;
-              ships.forEach((s) => s.update());
-              if (base) base.update();
-              if (eliminator) eliminator.update(ships);
-
-              // Projectiles - always update for smooth prediction on guest
-              for (let i = bolts.length - 1; i >= 0; i--) {
-                const b = bolts[i];
-                b.x += b.vx;
-                b.y += b.vy;
-                bounce(b, 4, 0.96);
-                b.life--;
-                if (b.life <= 0) bolts.splice(i, 1);
-              }
-              for (let i = enemyBolts.length - 1; i >= 0; i--) {
-                const b = enemyBolts[i];
-                b.x += b.vx;
-                b.y += b.vy;
-                bounce(b, 4, 0.96);
-                b.life--;
-                if (b.life <= 0) enemyBolts.splice(i, 1);
-              }
-              for (let i = fireballs.length - 1; i >= 0; i--) {
-                const f = fireballs[i];
-                f.x += f.vx;
-                f.y += f.vy;
-                bounce(f, 4, 0.96);
-                f.life--;
-                if (f.life <= 0) fireballs.splice(i, 1);
-              }
-              for (let i = baseFragments.length - 1; i >= 0; i--) {
-                const f = baseFragments[i];
-                f.x += f.vx;
-                f.y += f.vy;
-                f.vx *= 0.96;
-                f.vy *= 0.96;
-                f.angle += f.rotSpeed;
-                f.life--;
-                if (f.life <= 0) baseFragments.splice(i, 1);
-              }
-              fighters.forEach((f) => f.update(ships));
-
-              // Only host (or single player) runs spawn + collisions
-              if (!multiplayer || isHost) {
-                if (Date.now() - lastFighterSpawn > 1950 - round * 55) {
-                  lastFighterSpawn = Date.now();
-                  if (numPlayers === 1 || ships.filter((s) => s.lives > 0).length === 1)
-                    spawnFighter();
-                }
-                checkCollisions();
+          }
+        }
+        for (let s of ships) {
+          if (s.lives <= 0) continue;
+          if (
+            base.destroyedTimer === 0 &&
+            Math.hypot(s.x - base.x, s.y - base.y) < base.radius + s.radius
+          ) {
+            // Award points if another player drove this ship into the base
+            if (s.lastPushedBy !== null && s.lastPushedBy !== s.id) {
+              const pusher = ships[s.lastPushedBy];
+              if (pusher && pusher.lives > 0) {
+                pusher.score += 600 + round * 120;
+                pusher.droids += 2;
               }
             }
+            s.lives--;
+            s.lastPushedBy = null;
+            s.respawn();
+            updateHUD();
+          }
+          if (s.score >= s.lives * 6000 + 6000) {
+            s.lives++;
+            updateHUD();
+          }
+        }
+        const alive = ships.filter((s) => s.lives > 0).length;
+        if (alive === 0 && state === "playing") state = "gameover";
 
-            function drawBackground() {
-              ctx.fillStyle = "#000811";
-              ctx.fillRect(0, 0, WIDTH, HEIGHT);
-              ctx.strokeStyle = "#002200";
-              ctx.lineWidth = 1;
-              for (let x = 40; x < WIDTH; x += 40) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, HEIGHT);
-                ctx.stroke();
-              }
-              for (let y = 40; y < HEIGHT; y += 40) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(WIDTH, y);
-                ctx.stroke();
-              }
-            }
+        if (multiplayer) updateBorderColor(); // Dynamic border for leading player
+      }
 
-            function draw() {
-              drawBackground();
-              if (base) base.draw();
-              if (eliminator) eliminator.draw();
-              fighters.forEach((f) => f.draw());
-              ctx.shadowBlur = 12;
-              for (let f of baseFragments) {
-                ctx.save();
-                ctx.translate(f.x, f.y);
-                ctx.rotate(f.angle);
-                ctx.strokeStyle = "#ffaa00";
-                ctx.lineWidth = 3.5;
-                ctx.shadowColor = "#ffaa00";
-                ctx.beginPath();
-                const sides = f.points;
-                for (let i = 0; i < sides; i++) {
-                  const a = (i * Math.PI * 2) / sides;
-                  const r = f.size * (0.7 + Math.random() * 0.4);
-                  ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-                }
-                ctx.closePath();
-                ctx.stroke();
-                ctx.restore();
-              }
-              ctx.shadowBlur = 8;
-              bolts.forEach((b) => {
-                ctx.fillStyle = "#00ffff";
-                ctx.shadowColor = "#00ffff";
-                ctx.fillRect(b.x - 3, b.y - 3, 6, 6);
-              });
-              enemyBolts.forEach((b) => {
-                ctx.fillStyle = "#ff8800";
-                ctx.shadowColor = "#ff8800";
-                ctx.fillRect(b.x - 3, b.y - 3, 6, 6);
-              });
-              fireballs.forEach((f) => {
-                ctx.fillStyle = f.color;
-                ctx.shadowColor = f.color;
-                ctx.fillRect(f.x - 3, f.y - 3, 6, 6);
-              });
-              ships.forEach((s) => s.draw());
+      function update() {
+        if (state !== "playing") return;
+        ships.forEach((s) => s.update());
+        if (base) base.update();
+        if (eliminator) eliminator.update(ships);
 
-              if (debugMode && base) {
-                ctx.save();
-                ctx.fillStyle = "rgba(0,255,0,0.85)";
-                ctx.font = '12px "Press Start 2P"';
-                ctx.textAlign = "left";
-                ctx.shadowBlur = 0;
-                ctx.fillText(
-                  "DEBUG MODE — B = toggle   P = freeze rotation",
-                  20,
-                  580,
-                );
-                ctx.fillText(`Last explosion: ${lastExplosionReason}`, 20, 560);
-                ctx.fillText(
-                  `Base frozen: ${rotationFrozen ? "YES" : "NO"}   Angle: ${(((base.angle * 180) / Math.PI) % 360).toFixed(0)}°`,
-                  20,
-                  540,
-                );
-                ctx.fillText(
-                  `Tunnel startOffset: 20   tunnelLength: 85   tolerance: 7px`,
-                  20,
-                  520,
-                );
-                ctx.fillText(
-                  `Tunnel direction: ${base.tunnelAngleDebug ? (((base.tunnelAngleDebug * 180) / Math.PI) % 360).toFixed(0) : 0}°`,
-                  20,
-                  500,
-                );
-                ctx.strokeStyle = "#ffff00";
-                ctx.lineWidth = 3;
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.moveTo(base.tunnelStartX, base.tunnelStartY);
-                ctx.lineTo(base.tunnelEndX, base.tunnelEndY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                ctx.restore();
-              }
+        // Projectiles - always update for smooth prediction on guest
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          bounce(b, 4, 0.96);
+          b.life--;
+          if (b.life <= 0) bolts.splice(i, 1);
+        }
+        for (let i = enemyBolts.length - 1; i >= 0; i--) {
+          const b = enemyBolts[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          bounce(b, 4, 0.96);
+          b.life--;
+          if (b.life <= 0) enemyBolts.splice(i, 1);
+        }
+        for (let i = fireballs.length - 1; i >= 0; i--) {
+          const f = fireballs[i];
+          f.x += f.vx;
+          f.y += f.vy;
+          bounce(f, 4, 0.96);
+          f.life--;
+          if (f.life <= 0) fireballs.splice(i, 1);
+        }
+        for (let i = baseFragments.length - 1; i >= 0; i--) {
+          const f = baseFragments[i];
+          f.x += f.vx;
+          f.y += f.vy;
+          f.vx *= 0.96;
+          f.vy *= 0.96;
+          f.angle += f.rotSpeed;
+          f.life--;
+          if (f.life <= 0) baseFragments.splice(i, 1);
+        }
+        fighters.forEach((f) => f.update(ships));
 
-              if (state === "gameover") {
-                ctx.save();
-                ctx.fillStyle = "rgba(255,0,0,0.85)";
-                ctx.fillRect(0, 0, WIDTH, HEIGHT);
-                ctx.fillStyle = "#fff";
-                ctx.font = 'bold 48px "Press Start 2P"';
-                ctx.textAlign = "center";
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = "#ff0";
-                ctx.fillText("GAME OVER", WIDTH / 2, HEIGHT / 2 - 30);
-                ctx.font = '22px "Press Start 2P"';
-                ctx.fillText("PRESS R TO RESTART", WIDTH / 2, HEIGHT / 2 + 40);
-                ctx.restore();
-              }
-            }
+        // Only host (or single player) runs spawn + collisions
+        if (!multiplayer || isHost) {
+          if (Date.now() - lastFighterSpawn > 1950 - round * 55) {
+            lastFighterSpawn = Date.now();
+            if (
+              numPlayers === 1 ||
+              ships.filter((s) => s.lives > 0).length === 1
+            )
+              spawnFighter();
+          }
+          checkCollisions();
+        }
+      }
 
-            function gameLoop() {
-              update();
-              draw();
-              // === SEND STATE FROM HOST ===
-              if (state === "playing" && multiplayer && isHost && conn && conn.open) {
-                stateSendCounter++;
-                if (stateSendCounter % 3 === 0) {  // Reduced to ~20fps sync to prevent guest freezing
-                  try {
-                    conn.send({ type: "state", state: getGameState() });
-                  } catch (e) {}
-                }
-              }
-              // ============================
+      function drawBackground() {
+        ctx.fillStyle = "#000811";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.strokeStyle = "#002200";
+        ctx.lineWidth = 1;
+        for (let x = 40; x < WIDTH; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, HEIGHT);
+          ctx.stroke();
+        }
+        for (let y = 40; y < HEIGHT; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(WIDTH, y);
+          ctx.stroke();
+        }
+      }
 
-              requestAnimationFrame(gameLoop);
-            }
+      function draw() {
+        drawBackground();
+        if (base) base.draw();
+        if (eliminator) eliminator.draw();
+        fighters.forEach((f) => f.draw());
+        ctx.shadowBlur = 12;
+        for (let f of baseFragments) {
+          ctx.save();
+          ctx.translate(f.x, f.y);
+          ctx.rotate(f.angle);
+          ctx.strokeStyle = "#ffaa00";
+          ctx.lineWidth = 3.5;
+          ctx.shadowColor = "#ffaa00";
+          ctx.beginPath();
+          const sides = f.points;
+          for (let i = 0; i < sides; i++) {
+            const a = (i * Math.PI * 2) / sides;
+            const r = f.size * (0.7 + Math.random() * 0.4);
+            ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+          }
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
+        }
+        ctx.shadowBlur = 8;
+        bolts.forEach((b) => {
+          ctx.fillStyle = "#00ffff";
+          ctx.shadowColor = "#00ffff";
+          ctx.fillRect(b.x - 3, b.y - 3, 6, 6);
+        });
+        enemyBolts.forEach((b) => {
+          ctx.fillStyle = "#ff8800";
+          ctx.shadowColor = "#ff8800";
+          ctx.fillRect(b.x - 3, b.y - 3, 6, 6);
+        });
+        fireballs.forEach((f) => {
+          ctx.fillStyle = f.color;
+          ctx.shadowColor = f.color;
+          ctx.fillRect(f.x - 3, f.y - 3, 6, 6);
+        });
+        ships.forEach((s) => s.draw());
 
-            function showMenu() {
-              const overlay = document.getElementById("overlay");
-              overlay.innerHTML = `<div id="menu"><h1>TOMZELIMINATOR</h1><div class="subtitle">@ GREMLIN 1981</div>
+        if (debugMode && base) {
+          ctx.save();
+          ctx.fillStyle = "rgba(0,255,0,0.85)";
+          ctx.font = '12px "Press Start 2P"';
+          ctx.textAlign = "left";
+          ctx.shadowBlur = 0;
+          ctx.fillText(
+            "DEBUG MODE — B = toggle   P = freeze rotation",
+            20,
+            580,
+          );
+          ctx.fillText(`Last explosion: ${lastExplosionReason}`, 20, 560);
+          ctx.fillText(
+            `Base frozen: ${rotationFrozen ? "YES" : "NO"}   Angle: ${(((base.angle * 180) / Math.PI) % 360).toFixed(0)}°`,
+            20,
+            540,
+          );
+          ctx.fillText(
+            `Tunnel startOffset: 20   tunnelLength: 85   tolerance: 7px`,
+            20,
+            520,
+          );
+          ctx.fillText(
+            `Tunnel direction: ${base.tunnelAngleDebug ? (((base.tunnelAngleDebug * 180) / Math.PI) % 360).toFixed(0) : 0}°`,
+            20,
+            500,
+          );
+          ctx.strokeStyle = "#ffff00";
+          ctx.lineWidth = 3;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(base.tunnelStartX, base.tunnelStartY);
+          ctx.lineTo(base.tunnelEndX, base.tunnelEndY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
+
+        if (state === "gameover") {
+          ctx.save();
+          ctx.fillStyle = "rgba(255,0,0,0.85)";
+          ctx.fillRect(0, 0, WIDTH, HEIGHT);
+          ctx.fillStyle = "#fff";
+          ctx.font = 'bold 48px "Press Start 2P"';
+          ctx.textAlign = "center";
+          ctx.shadowBlur = 30;
+          ctx.shadowColor = "#ff0";
+          ctx.fillText("GAME OVER", WIDTH / 2, HEIGHT / 2 - 30);
+          ctx.font = '22px "Press Start 2P"';
+          ctx.fillText("PRESS R TO RESTART", WIDTH / 2, HEIGHT / 2 + 40);
+          ctx.restore();
+        }
+      }
+
+      function gameLoop() {
+        update();
+        draw();
+        // === SEND STATE FROM HOST ===
+        if (state === "playing" && multiplayer && isHost && conn && conn.open) {
+          stateSendCounter++;
+          if (stateSendCounter % 3 === 0) {
+            // Reduced to ~20fps sync to prevent guest freezing
+            try {
+              conn.send({ type: "state", state: getGameState() });
+            } catch (e) {}
+          }
+        }
+        // ============================
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      function showMenu() {
+        const overlay = document.getElementById("overlay");
+        overlay.innerHTML = `<div id="menu"><h1>TOMZELIMINATOR</h1><div class="subtitle">@ GREMLIN 1981</div>
       <div class="option" onclick="startGame(1)">1 PLAYER — VS COMPUTER</div>
       <div class="option" onclick="createRoom()">CREATE ROOM (2P MULTIPLAYER)</div>
       <div class="option" onclick="joinRoomPrompt()">JOIN ROOM (2P MULTIPLAYER)</div>
       <div class="instructions">MAX 3 ENERGY BOLTS • NEW BOLT KILLS OLDEST • DESTROY BASE TO SCORE • BASE SPAWNS ELIMINATOR • SHOOT FIGHTERS & ELIMINATOR TO SCORE • DRIVE FIGHTERS AND ELIMINATOR INTO BASE STATION TO SCORE<br><br><b>2P MULTIPLAYER:</b> Both players use <b>D/F/J/K</b> (cyan = host, magenta = guest) • Share room code!</div>
         <br><div style="margin-top:20px;font-size:12px;opacity:0.6">PLAYER 1: D left turn/F right turn/J thrust/K fire<br>DEBUG: B = toggle debug, P = freeze base rotation</div></div>`;
-            }
+      }
 
-            // === NEW MULTIPLAYER FUNCTIONS ===
-            function createRoom() {
-              peer = new Peer();
-              peer.on("open", function (id) {
-                const overlay = document.getElementById("overlay");
-                overlay.innerHTML = `
+      // === NEW MULTIPLAYER FUNCTIONS ===
+      function createRoom() {
+        peer = new Peer();
+        peer.on("open", function (id) {
+          const overlay = document.getElementById("overlay");
+          overlay.innerHTML = `
                   <div id="menu">
                     <h1>ROOM CREATED</h1>
                     <div class="subtitle">Share this code with your friend:</div>
@@ -1355,235 +1359,236 @@
                     <div class="option" onclick="if (conn && conn.open) startMultiplayerHost(); else alert('No player connected yet!');">START GAME</div>
                     <div style="margin-top:30px;font-size:12px;opacity:0.7">Both players use the same keys: D=left, F=right, J=thrust, K=fire</div>
                   </div>`;
-              });
+        });
 
-              peer.on("connection", function (c) {
-                conn = c;
-                conn.on("open", function () {
-                  const menuEl = document.getElementById("menu");
-                  if (menuEl) {
-                    menuEl.innerHTML = `<h1>PLAYER JOINED!</h1><div class="subtitle">Ready?</div><div class="option" onclick="startMultiplayerHost()">START GAME</div>`;
-                  }
-                });
-                conn.on("data", function (data) {
-                  if (data.type === "inputs") {
-                    guestKeys = data.keys || {};
-                  }
-                });
-                conn.on("close", function () {
-                  alert("Player disconnected.");
-                  showMenu();
-                  state = "menu";
-                  multiplayer = false;
-                });
-              });
-
-              peer.on("error", function (err) {
-                alert("Peer error: " + err);
-                showMenu();
-              });
+        peer.on("connection", function (c) {
+          conn = c;
+          conn.on("open", function () {
+            const menuEl = document.getElementById("menu");
+            if (menuEl) {
+              menuEl.innerHTML = `<h1>PLAYER JOINED!</h1><div class="subtitle">Ready?</div><div class="option" onclick="startMultiplayerHost()">START GAME</div>`;
             }
-
-            function joinRoomPrompt() {
-              const code = prompt("Enter Room Code from host:");
-              if (!code || code.trim() === "") return;
-
-              peer = new Peer();
-              peer.on("open", function () {
-                conn = peer.connect(code.trim());
-                conn.on("open", function () {
-                  isHost = false;
-                  multiplayer = true;
-                  startMultiplayerGuest();
-                });
-                conn.on("data", function (data) {
-                  if (data.type === "state") {
-                    applyGameState(data.state);
-                  }
-                });
-                conn.on("close", function () {
-                  alert("Disconnected from host.");
-                  showMenu();
-                  state = "menu";
-                  multiplayer = false;
-                });
-              });
-              peer.on("error", function (err) {
-                alert("Connection error: " + err);
-                showMenu();
-              });
+          });
+          conn.on("data", function (data) {
+            if (data.type === "inputs") {
+              guestKeys = data.keys || {};
             }
+          });
+          conn.on("close", function () {
+            alert("Player disconnected.");
+            showMenu();
+            state = "menu";
+            multiplayer = false;
+          });
+        });
 
-            window.startMultiplayerHost = function () {
-              if (!conn || !conn.open) {
-                alert("No player connected yet!");
-                return;
+        peer.on("error", function (err) {
+          alert("Peer error: " + err);
+          showMenu();
+        });
+      }
+
+      function joinRoomPrompt() {
+        const code = prompt("Enter Room Code from host:");
+        if (!code || code.trim() === "") return;
+
+        peer = new Peer();
+        peer.on("open", function () {
+          conn = peer.connect(code.trim());
+          conn.on("open", function () {
+            isHost = false;
+            multiplayer = true;
+            startMultiplayerGuest();
+          });
+          conn.on("data", function (data) {
+            if (data.type === "state") {
+              applyGameState(data.state);
+            }
+          });
+          conn.on("close", function () {
+            alert("Disconnected from host.");
+            showMenu();
+            state = "menu";
+            multiplayer = false;
+          });
+        });
+        peer.on("error", function (err) {
+          alert("Connection error: " + err);
+          showMenu();
+        });
+      }
+
+      window.startMultiplayerHost = function () {
+        if (!conn || !conn.open) {
+          alert("No player connected yet!");
+          return;
+        }
+        canvas.style.display = "block";
+        document.getElementById("overlay").innerHTML = "";
+        initGame(2);
+        multiplayer = true;
+        isHost = true;
+        state = "playing";
+        stateSendCounter = 0;
+        guestKeys = {};
+        updateBorderColor(); // Set initial border color
+      };
+
+      window.startMultiplayerGuest = function () {
+        canvas.style.display = "block";
+        document.getElementById("overlay").innerHTML = "";
+        initGame(2);
+        multiplayer = true;
+        isHost = false;
+        state = "playing";
+        updateBorderColor(); // Set initial border color
+
+        if (inputInterval) clearInterval(inputInterval);
+        inputInterval = setInterval(() => {
+          if (conn && conn.open && multiplayer && !isHost) {
+            conn.send({ type: "inputs", keys: keys });
+          }
+        }, 50);
+      };
+
+      function getGameState() {
+        return {
+          ships: ships.map((s) => ({
+            x: s.x,
+            y: s.y,
+            vx: s.vx,
+            vy: s.vy,
+            angle: s.angle,
+            lives: s.lives,
+            score: s.score,
+            droids: s.droids,
+            thrusting: s.thrusting,
+          })),
+          base: base
+            ? {
+                x: base.x,
+                y: base.y,
+                vx: base.vx,
+                vy: base.vy,
+                angle: base.angle,
+                destroyedTimer: base.destroyedTimer,
               }
-              canvas.style.display = "block";
-              document.getElementById("overlay").innerHTML = "";
+            : null,
+          eliminator: eliminator
+            ? {
+                x: eliminator.x,
+                y: eliminator.y,
+                vx: eliminator.vx,
+                vy: eliminator.vy,
+                angle: eliminator.angle,
+                state: eliminator.state,
+                formTimer: eliminator.formTimer,
+                emergedTimer: eliminator.emergedTimer,
+                shieldTimer: eliminator.shieldTimer,
+                repelTimer: eliminator.repelTimer,
+                fireCooldown: eliminator.fireCooldown,
+              }
+            : null,
+          bolts: bolts.map((b) => ({ ...b })),
+          enemyBolts: enemyBolts.map((b) => ({ ...b })),
+          fireballs: fireballs.map((f) => ({ ...f })),
+          fighters: fighters.map((f) => ({ ...f })),
+          baseFragments: baseFragments.map((f) => ({ ...f })),
+          round: round,
+          gameStatus: state,
+        };
+      }
+
+      function applyGameState(gs) {
+        if (!gs) return;
+        if (gs.gameStatus && gs.gameStatus !== state) {
+          state = gs.gameStatus;
+        }
+        if (gs.ships && ships.length === gs.ships.length) {
+          for (let i = 0; i < ships.length; i++) {
+            const s = ships[i];
+            const ss = gs.ships[i];
+            s.x = ss.x;
+            s.y = ss.y;
+            s.vx = ss.vx;
+            s.vy = ss.vy;
+            s.angle = ss.angle;
+            s.lives = ss.lives;
+            s.score = ss.score;
+            s.droids = ss.droids;
+            s.thrusting = ss.thrusting;
+          }
+        }
+        if (base && gs.base) {
+          base.x = gs.base.x;
+          base.y = gs.base.y;
+          base.vx = gs.base.vx;
+          base.vy = gs.base.vy;
+          base.angle = gs.base.angle;
+          base.destroyedTimer = gs.base.destroyedTimer;
+        }
+        if (eliminator && gs.eliminator) {
+          const e = gs.eliminator;
+          eliminator.x = e.x;
+          eliminator.y = e.y;
+          eliminator.vx = e.vx;
+          eliminator.vy = e.vy;
+          eliminator.angle = e.angle;
+          eliminator.state = e.state;
+          eliminator.formTimer = e.formTimer;
+          eliminator.emergedTimer = e.emergedTimer;
+          eliminator.shieldTimer = e.shieldTimer;
+          eliminator.repelTimer = e.repelTimer;
+          eliminator.fireCooldown = e.fireCooldown;
+        }
+        bolts = gs.bolts ? gs.bolts.map((b) => ({ ...b })) : [];
+        enemyBolts = gs.enemyBolts ? gs.enemyBolts.map((b) => ({ ...b })) : [];
+        fireballs = gs.fireballs ? gs.fireballs.map((f) => ({ ...f })) : [];
+        fighters = gs.fighters ? gs.fighters.map((f) => ({ ...f })) : [];
+        baseFragments = gs.baseFragments
+          ? gs.baseFragments.map((f) => ({ ...f }))
+          : [];
+        if (gs.round !== undefined) round = gs.round;
+
+        if (multiplayer) {
+          updateHUD(); // Keep HUD in sync on guest tab
+          updateBorderColor(); // Update glowing border to current leader
+        }
+      }
+      // =================================
+
+      window.startGame = function (count) {
+        canvas.style.display = "block";
+        document.getElementById("overlay").innerHTML = "";
+        initGame(count);
+        state = "playing";
+      };
+
+      window.addEventListener("keydown", (e) => {
+        keys[e.code] = true;
+        if (state === "playing") {
+          if (e.code === "KeyB") debugMode = !debugMode;
+          if (debugMode && e.code === "KeyP") rotationFrozen = !rotationFrozen;
+        }
+        if (state === "gameover" && e.code === "KeyR") {
+          if (multiplayer) {
+            if (isHost) {
               initGame(2);
-              multiplayer = true;
-              isHost = true;
               state = "playing";
               stateSendCounter = 0;
-              guestKeys = {};
-              updateBorderColor(); // Set initial border color
-            };
-            };
-
-            window.startMultiplayerGuest = function () {
-              canvas.style.display = "block";
-              document.getElementById("overlay").innerHTML = "";
-              initGame(2);
-              multiplayer = true;
-              isHost = false;
-              state = "playing";
-              updateBorderColor(); // Set initial border color
-
-              if (inputInterval) clearInterval(inputInterval);
-              inputInterval = setInterval(() => {
-                if (conn && conn.open && multiplayer && !isHost) {
-                  conn.send({ type: "inputs", keys: keys });
-                }
-              }, 50);
-            };
-
-            function getGameState() {
-              return {
-                ships: ships.map((s) => ({
-                  x: s.x,
-                  y: s.y,
-                  vx: s.vx,
-                  vy: s.vy,
-                  angle: s.angle,
-                  lives: s.lives,
-                  score: s.score,
-                  droids: s.droids,
-                  thrusting: s.thrusting,
-                })),
-                base: base
-                  ? {
-                      x: base.x,
-                      y: base.y,
-                      vx: base.vx,
-                      vy: base.vy,
-                      angle: base.angle,
-                      destroyedTimer: base.destroyedTimer,
-                    }
-                  : null,
-                eliminator: eliminator
-                  ? {
-                      x: eliminator.x,
-                      y: eliminator.y,
-                      vx: eliminator.vx,
-                      vy: eliminator.vy,
-                      angle: eliminator.angle,
-                      state: eliminator.state,
-                      formTimer: eliminator.formTimer,
-                      emergedTimer: eliminator.emergedTimer,
-                      shieldTimer: eliminator.shieldTimer,
-                      repelTimer: eliminator.repelTimer,
-                      fireCooldown: eliminator.fireCooldown,
-                    }
-                  : null,
-                bolts: bolts.map((b) => ({ ...b })),
-                enemyBolts: enemyBolts.map((b) => ({ ...b })),
-                fireballs: fireballs.map((f) => ({ ...f })),
-                fighters: fighters.map((f) => ({ ...f })),
-                baseFragments: baseFragments.map((f) => ({ ...f })),
-                round: round,
-                gameStatus: state,
-              };
             }
+          } else {
+            showMenu();
+            state = "menu";
+          }
+        }
+      });
+      window.addEventListener("keyup", (e) => (keys[e.code] = false));
 
-            function applyGameState(gs) {
-              if (!gs) return;
-              if (gs.gameStatus && gs.gameStatus !== state) {
-                state = gs.gameStatus;
-              }
-              if (gs.ships && ships.length === gs.ships.length) {
-                for (let i = 0; i < ships.length; i++) {
-                  const s = ships[i];
-                  const ss = gs.ships[i];
-                  s.x = ss.x;
-                  s.y = ss.y;
-                  s.vx = ss.vx;
-                  s.vy = ss.vy;
-                  s.angle = ss.angle;
-                  s.lives = ss.lives;
-                  s.score = ss.score;
-                  s.droids = ss.droids;
-                  s.thrusting = ss.thrusting;
-                }
-              }
-              if (base && gs.base) {
-                base.x = gs.base.x;
-                base.y = gs.base.y;
-                base.vx = gs.base.vx;
-                base.vy = gs.base.vy;
-                base.angle = gs.base.angle;
-                base.destroyedTimer = gs.base.destroyedTimer;
-              }
-              if (eliminator && gs.eliminator) {
-                const e = gs.eliminator;
-                eliminator.x = e.x;
-                eliminator.y = e.y;
-                eliminator.vx = e.vx;
-                eliminator.vy = e.vy;
-                eliminator.angle = e.angle;
-                eliminator.state = e.state;
-                eliminator.formTimer = e.formTimer;
-                eliminator.emergedTimer = e.emergedTimer;
-                eliminator.shieldTimer = e.shieldTimer;
-                eliminator.repelTimer = e.repelTimer;
-                eliminator.fireCooldown = e.fireCooldown;
-              }
-              bolts = gs.bolts ? gs.bolts.map((b) => ({ ...b })) : [];
-              enemyBolts = gs.enemyBolts ? gs.enemyBolts.map((b) => ({ ...b })) : [];
-              fireballs = gs.fireballs ? gs.fireballs.map((f) => ({ ...f })) : [];
-              fighters = gs.fighters ? gs.fighters.map((f) => ({ ...f })) : [];
-              baseFragments = gs.baseFragments ? gs.baseFragments.map((f) => ({ ...f })) : [];
-              if (gs.round !== undefined) round = gs.round;
-
-              if (multiplayer) {
-                updateHUD();           // Keep HUD in sync on guest tab
-                updateBorderColor();   // Update glowing border to current leader
-              }
-            }
-            // =================================
-
-            window.startGame = function (count) {
-              canvas.style.display = "block";
-              document.getElementById("overlay").innerHTML = "";
-              initGame(count);
-              state = "playing";
-            };
-
-            window.addEventListener("keydown", (e) => {
-              keys[e.code] = true;
-              if (state === "playing") {
-                if (e.code === "KeyB") debugMode = !debugMode;
-                if (debugMode && e.code === "KeyP") rotationFrozen = !rotationFrozen;
-              }
-              if (state === "gameover" && e.code === "KeyR") {
-                if (multiplayer) {
-                  if (isHost) {
-                    initGame(2);
-                    state = "playing";
-                    stateSendCounter = 0;
-                  }
-                } else {
-                  showMenu();
-                  state = "menu";
-                }
-              }
-            });
-            window.addEventListener("keyup", (e) => (keys[e.code] = false));
-
-            window.onload = function () {
-              showMenu();
-              gameLoop();
-            };
+      window.onload = function () {
+        showMenu();
+        gameLoop();
+      };
     </script>
   </body>
 </html>
