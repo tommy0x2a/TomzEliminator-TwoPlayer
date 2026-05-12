@@ -358,10 +358,15 @@
         }
         update() {
           if (this.lives <= 0) return;
-          const ctrl = CONTROLS[this.id];
+
+          // === MULTIPLAYER: Both players use D/F/J/K controls (no key contention across tabs) ===
+          let ctrl = CONTROLS[this.id];
+          if (multiplayer && this.id === 1) {
+            ctrl = CONTROLS[0]; // Guest (magenta ship) uses same keys as host
+          }
+
           let input = keys;
 
-          // === MULTIPLAYER INPUT HANDLING ===
           if (multiplayer) {
             if (isHost && this.id === 1) {
               input = guestKeys || {};
@@ -369,7 +374,7 @@
               input = {}; // Guest does not control host's ship
             }
           }
-          // ==================================
+          // ====================================================================================
 
           if (input[ctrl.left]) this.angle -= 0.08;
           if (input[ctrl.right]) this.angle += 0.08;
@@ -1255,11 +1260,6 @@
       function gameLoop() {
         update();
         draw();
-        if (state === "playing") {
-          document.getElementById("gameTitle").innerHTML =
-            `ELIMINATOR<br>ROUND ${round}${multiplayer ? (isHost ? " (HOST)" : " (GUEST)") : ""}`;
-        }
-
         // === SEND STATE FROM HOST ===
         if (state === "playing" && multiplayer && isHost && conn && conn.open) {
           stateSendCounter++;
@@ -1280,7 +1280,7 @@
 <div class="option" onclick="startGame(1)">1 PLAYER — VS COMPUTER</div>
 <div class="option" onclick="createRoom()">CREATE ROOM (2P MULTIPLAYER)</div>
 <div class="option" onclick="joinRoomPrompt()">JOIN ROOM (2P MULTIPLAYER)</div>
-<div class="instructions">MAX 3 ENERGY BOLTS • NEW BOLT KILLS OLDEST • DESTROY BASE TO SCORE • BASE SPAWNS ELIMINATOR • SHOOT FIGHTERS & ELIMINATOR TO SCORE • DRIVE FIGHTERS AND ELIMINATOR INTO BASE STATION TO SCORE<br><br><b>2P MULTIPLAYER:</b> Host (cyan) uses D/F/J/K • Guest (magenta) uses A/D/W/S • Share room code!</div>
+<div class="instructions">MAX 3 ENERGY BOLTS • NEW BOLT KILLS OLDEST • DESTROY BASE TO SCORE • BASE SPAWNS ELIMINATOR • SHOOT FIGHTERS & ELIMINATOR TO SCORE • DRIVE FIGHTERS AND ELIMINATOR INTO BASE STATION TO SCORE<br><br><b>2P MULTIPLAYER:</b> Both players use <b>D/F/J/K</b> (cyan = host, magenta = guest) • Share room code!</div>
   <br><div style="margin-top:20px;font-size:12px;opacity:0.6">PLAYER 1: D left turn/F right turn/J thrust/K fire<br>DEBUG: B = toggle debug, P = freeze base rotation</div></div>`;
       }
 
@@ -1296,7 +1296,7 @@
               <div style="font-size:26px;color:#ff0;margin:20px 0;word-break:break-all;">${id}</div>
               <div style="margin:20px 0;font-size:14px;">Waiting for player to join...</div>
               <div class="option" onclick="if (conn && conn.open) startMultiplayerHost(); else alert('No player connected yet!');">START GAME</div>
-              <div style="margin-top:30px;font-size:12px;opacity:0.7">Guest controls: A = left, D = right, W = thrust, S = fire</div>
+              <div style="margin-top:30px;font-size:12px;opacity:0.7">Both players use the same keys: D=left, F=right, J=thrust, K=fire</div>
             </div>`;
         });
 
