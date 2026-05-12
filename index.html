@@ -341,6 +341,7 @@
           this.droids = 0;
           this.thrusting = false;
           this.fireCooldown = 0;
+          this.lastPushedBy = null;
         }
         respawn() {
           if (this.lives > 0) {
@@ -354,6 +355,7 @@
               (7 * Math.PI) / 4,
               (5 * Math.PI) / 4,
             ][this.id];
+            this.lastPushedBy = null;
           }
         }
         update() {
@@ -893,7 +895,10 @@
         let html = "";
         for (let i = 0; i < ships.length; i++) {
           const s = ships[i];
-          if (s.lives > 0) {
+          if (multiplayer && ships.length === 2) {
+            // Always show both players in 2P multiplayer (even if one has 0 lives)
+            html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
+          } else if (s.lives > 0) {
             html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
           }
         }
@@ -948,6 +953,31 @@
             }
           }
         }
+
+        // === NEW: Player bolts hit & push other players (multiplayer only) ===
+        if (multiplayer && ships.length === 2) {
+          for (let i = bolts.length - 1; i >= 0; i--) {
+            const b = bolts[i];
+            for (let s of ships) {
+              if (s.id === b.owner || s.lives <= 0) continue;
+              if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 9) {
+                s.vx += b.vx * b.power * 1.3;
+                s.vy += b.vy * b.power * 1.3;
+                s.lastPushedBy = b.owner;
+                const shooter = ships[b.owner];
+                if (shooter && shooter.lives > 0) {
+                  shooter.score += 150 + round * 30;
+                  shooter.droids++;
+                }
+                bolts.splice(i, 1);
+                Sound.playHit();
+                updateHUD();
+                break;
+              }
+            }
+          }
+        }
+        // =====================================================================
         for (let i = enemyBolts.length - 1; i >= 0; i--) {
           const b = enemyBolts[i];
           let hit = false;
@@ -1072,7 +1102,16 @@
             base.destroyedTimer === 0 &&
             Math.hypot(s.x - base.x, s.y - base.y) < base.radius + s.radius
           ) {
+            // Award points if another player drove this ship into the base
+            if (s.lastPushedBy !== null && s.lastPushedBy !== s.id) {
+              const pusher = ships[s.lastPushedBy];
+              if (pusher && pusher.lives > 0) {
+                pusher.score += 600 + round * 120;
+                pusher.droids += 2;
+              }
+            }
             s.lives--;
+            s.lastPushedBy = null;
             s.respawn();
             updateHUD();
           }
@@ -1486,6 +1525,8 @@
           ? gs.baseFragments.map((f) => ({ ...f }))
           : [];
         if (gs.round !== undefined) round = gs.round;
+
+        if (multiplayer) updateHUD(); // Keep HUD in sync on guest tab
       }
       // =================================
 
