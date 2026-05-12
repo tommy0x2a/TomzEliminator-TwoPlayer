@@ -980,8 +980,14 @@
             for (let s of ships) {
               if (s.id === b.owner || s.lives <= 0) continue;
               if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 9) {
-                s.vx += b.vx * b.power * 1.3;
-                s.vy += b.vy * b.power * 1.3;
+                // s.vx, s.vy the knockback multiplier.
+                // 0.8 Weak push Gentle nudge
+                // 1.0 Normal push Balanced
+                // 1.3 Strong push
+                // 1.6 – 1.8 Strong push Very noticeable knockback
+                // 2.0+ Very strong / almost launches the shipHigh impact
+                s.vx += b.vx * b.power * 1.0;
+                s.vy += b.vy * b.power * 1.0;
                 s.lastPushedBy = b.owner;
                 const shooter = ships[b.owner];
                 if (shooter && shooter.lives > 0) {
