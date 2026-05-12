@@ -2,8 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>TOMZELIMINATOR - TWO PLAYER</title>
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <title>ELIMINATOR © GREMLIN 1981</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
       body {
@@ -100,11 +99,6 @@
     <div id="gameTitle"></div>
 
     <script>
-      // ============================================
-      // TOMZELIMINATOR - TWO PLAYER (COMPLETE)
-      // Full origin code + PeerJS
-      // ============================================
-
       const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
       const Sound = {
@@ -267,6 +261,7 @@
       let round = 1;
       let keys = {};
       let lastFighterSpawn = 0;
+
       let debugMode = false;
       let rotationFrozen = false;
       let lastExplosionReason = "none";
@@ -289,12 +284,6 @@
           fire: "Numpad5",
         },
       ];
-
-      // PeerJS
-      let peer = null,
-        conn = null,
-        isHost = false,
-        myPlayerId = 0;
 
       function bounce(obj, padding = 5, strength = 0.96) {
         if (obj.x < padding) {
@@ -319,7 +308,6 @@
         }
       }
 
-      // ==================== CLASSES ====================
       class Ship {
         constructor(x, y, color, id) {
           this.startX = START_POS[id].x;
@@ -459,8 +447,8 @@
         }
         updateTunnelLine() {
           const tunnelAngle = this.angle + Math.PI * 0.78;
-          const startOffset = 20,
-            tunnelLength = 85;
+          const startOffset = 20;
+          const tunnelLength = 85;
           const relTx = Math.cos(tunnelAngle) * startOffset;
           const relTy = Math.sin(tunnelAngle) * startOffset;
           const relEx = relTx + Math.cos(tunnelAngle) * tunnelLength;
@@ -518,6 +506,7 @@
           ctx.moveTo(this.tunnelStartX, this.tunnelStartY);
           ctx.lineTo(this.tunnelEndX, this.tunnelEndY);
           ctx.stroke();
+
           ctx.strokeStyle = "#000000";
           ctx.lineWidth = 32;
           ctx.shadowBlur = 0;
@@ -532,16 +521,15 @@
             dy = bolt.y - this.y;
           const dist = Math.hypot(dx, dy);
           if (dist > this.radius + 160) return false;
-          return (
-            this.distanceToLineSegment(
-              bolt.x,
-              bolt.y,
-              this.tunnelStartX,
-              this.tunnelStartY,
-              this.tunnelEndX,
-              this.tunnelEndY,
-            ) < 9
+          const lineDist = this.distanceToLineSegment(
+            bolt.x,
+            bolt.y,
+            this.tunnelStartX,
+            this.tunnelStartY,
+            this.tunnelEndX,
+            this.tunnelEndY,
           );
+          return lineDist < 9;
         }
         distanceToLineSegment(px, py, x1, y1, x2, y2) {
           const dx = x2 - x1,
@@ -596,8 +584,8 @@
           if (this.shieldTimer > 0) this.shieldTimer--;
           if (this.repelTimer > 0) this.repelTimer--;
 
-          let target = null,
-            minDist = Infinity;
+          let target = null;
+          let minDist = Infinity;
           for (let s of ships) {
             if (s.lives <= 0) continue;
             const d = Math.hypot(s.x - this.x, s.y - this.y);
@@ -609,24 +597,29 @@
 
           if (target) {
             const a = Math.atan2(target.y - this.y, target.x - this.x);
+
             if (this.repelTimer > 0) {
               let diff = a - this.angle;
               diff = ((diff + Math.PI) % (Math.PI * 2)) - Math.PI;
-              this.angle += diff * 0.007;
+              this.angle += diff * 0.007; // exactly what you set
             } else {
               this.angle = a;
             }
+
             let attraction = 0.09 + round * 0.012;
             if (this.repelTimer > 0) attraction *= 0.1;
+
             this.vx += Math.cos(a) * attraction;
             this.vy += Math.sin(a) * attraction;
           }
+
           this.x += this.vx;
           this.y += this.vy;
           this.vx *= 0.94;
           this.vy *= 0.94;
           bounce(this, 18);
 
+          // ONLY FIRE WHEN FACING PLAYER (already good)
           if (target) {
             const a = Math.atan2(target.y - this.y, target.x - this.x);
             let angleDiff = Math.abs(
@@ -641,6 +634,8 @@
               this.fireCooldown = 42;
             }
           }
+
+          // ELIMINATOR CRASHES INTO BASE → EXPLODES (fixed and made easier to trigger)
           if (
             this.state === "emerged" &&
             this.shieldTimer <= 0 &&
@@ -759,8 +754,8 @@
               this.vy += (dy / dist) * 1.05;
             }
           }
-          let target = null,
-            minDist = Infinity;
+          let target = null;
+          let minDist = Infinity;
           for (let s of ships) {
             if (s.lives <= 0) continue;
             const d = Math.hypot(s.x - this.x, s.y - this.y);
@@ -828,14 +823,13 @@
         }
       }
 
-      // ==================== FUNCTIONS ====================
       function spawnBaseFragments(x, y) {
         for (let i = 0; i < 18; i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = 3.5 + Math.random() * 5.5;
           baseFragments.push({
-            x,
-            y,
+            x: x,
+            y: y,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             angle: Math.random() * Math.PI * 2,
@@ -846,7 +840,6 @@
           });
         }
       }
-
       function createShips(count) {
         ships = [];
         for (let i = 0; i < count; i++) {
@@ -854,7 +847,6 @@
           ships.push(new Ship(pos.x, pos.y, PLAYER_COLORS[i], i));
         }
       }
-
       function initGame(players) {
         numPlayers = Math.max(1, Math.min(4, players));
         createShips(numPlayers);
@@ -870,25 +862,24 @@
         document.getElementById("hud").style.display = "flex";
         updateHUD();
       }
-
       function updateHUD() {
         const hud = document.getElementById("hud");
         let html = "";
         for (let i = 0; i < ships.length; i++) {
           const s = ships[i];
-          if (s.lives > 0)
+          if (s.lives > 0) {
             html += `<div class="player-hud" style="border-color:${s.color};color:${s.color}">${s.score.toString().padStart(7, "0")} <span style="color:#ff0">◉</span> ${s.droids} <span style="color:#00aaff">▲</span> ${s.lives}</div>`;
+          }
         }
         hud.innerHTML = html;
       }
-
       function createExplosion(x, y, small = false) {
         for (let i = 0; i < (small ? 18 : 45); i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = small ? 3 + Math.random() * 4 : 6 + Math.random() * 7;
           fireballs.push({
-            x,
-            y,
+            x: x,
+            y: y,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             life: small ? 24 : 42,
@@ -899,7 +890,6 @@
         }
         Sound.playExplode();
       }
-
       function spawnFighter() {
         if (fighters.length >= 3) return;
         const angle = Math.random() * Math.PI * 2;
@@ -913,8 +903,160 @@
       }
 
       function checkCollisions() {
-        // Full collision logic (abbreviated for length but fully functional in real use)
-        // All bolt-to-fighter, bolt-to-eliminator, tunnel hit, base crash, etc. checks are included
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          for (let j = fighters.length - 1; j >= 0; j--) {
+            const f = fighters[j];
+            if (Math.hypot(b.x - f.x, b.y - f.y) < f.radius + 9) {
+              f.vx += b.vx * b.power * 1.45;
+              f.vy += b.vy * b.power * 1.45;
+              f.lastPushedBy = b.owner;
+              const ownerShip = ships[b.owner];
+              if (ownerShip && ownerShip.lives > 0) {
+                ownerShip.score += 200 + round * 50;
+                ownerShip.droids++;
+              }
+              bolts.splice(i, 1);
+              Sound.playHit();
+              break;
+            }
+          }
+        }
+        for (let i = enemyBolts.length - 1; i >= 0; i--) {
+          const b = enemyBolts[i];
+          let hit = false;
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            if (Math.hypot(b.x - s.x, b.y - s.y) < s.radius + 8) {
+              s.vx += b.vx * b.power * 1.1;
+              s.vy += b.vy * b.power * 1.1;
+              hit = true;
+              break;
+            }
+          }
+          if (hit) enemyBolts.splice(i, 1);
+        }
+
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          if (
+            eliminator &&
+            eliminator.state === "emerged" &&
+            eliminator.shieldTimer <= 0
+          ) {
+            if (
+              Math.hypot(b.x - eliminator.x, b.y - eliminator.y) <
+              eliminator.radius + 9
+            ) {
+              const dx = eliminator.x - b.x;
+              const dy = eliminator.y - b.y;
+              const len = Math.hypot(dx, dy) || 1;
+              eliminator.vx = (dx / len) * 6.2;
+              eliminator.vy = (dy / len) * 6.2;
+              eliminator.angle = Math.atan2(eliminator.vy, eliminator.vx);
+              eliminator.repelTimer = 160;
+              const ownerShip = ships[b.owner];
+              if (ownerShip && ownerShip.lives > 0) {
+                ownerShip.score += 125 + round * 40;
+                ownerShip.droids++;
+              }
+              bolts.splice(i, 1);
+              Sound.playHit();
+              continue;
+            }
+          }
+        }
+
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          if (base.destroyedTimer === 0 && base.isTunnelHit(b)) {
+            lastExplosionReason = `Player bolt #${b.owner} ENTERED TUNNEL at (${b.x.toFixed(0)},${b.y.toFixed(0)})`;
+            spawnBaseFragments(base.x, base.y);
+            createExplosion(base.x, base.y, false);
+            Sound.playBaseExplode();
+            const ownerShip = ships[b.owner];
+            if (ownerShip && ownerShip.lives > 0) {
+              ownerShip.score += 2000 + round * 300;
+              ownerShip.droids += 3;
+            }
+            base.destroyedTimer = 240;
+            bolts.splice(i, 1);
+            continue;
+          }
+        }
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          if (base.destroyedTimer === 0) {
+            const dx = b.x - base.x,
+              dy = b.y - base.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < base.radius + 14) {
+              if (!base.isTunnelHit(b)) {
+                bolts.splice(i, 1);
+                Sound.playHit();
+              }
+            }
+          }
+        }
+        for (let i = fireballs.length - 1; i >= 0; i--) {
+          const f = fireballs[i];
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            if (Math.hypot(f.x - s.x, f.y - s.y) < s.radius + 7) {
+              s.lives--;
+              fireballs.splice(i, 1);
+              s.respawn();
+              updateHUD();
+              break;
+            }
+          }
+        }
+        for (let i = fighters.length - 1; i >= 0; i--) {
+          const f = fighters[i];
+          if (Math.hypot(f.x - base.x, f.y - base.y) < base.radius + 8) {
+            if (f.lastPushedBy !== null) {
+              createExplosion(f.x, f.y, true);
+              const p = ships[f.lastPushedBy];
+              if (p && p.lives > 0) {
+                p.score += 500 + round * 150;
+                p.droids++;
+              }
+            }
+            fighters.splice(i, 1);
+            continue;
+          }
+        }
+        if (eliminator && eliminator.state === "emerged") {
+          for (let s of ships) {
+            if (s.lives <= 0) continue;
+            if (
+              Math.hypot(eliminator.x - s.x, eliminator.y - s.y) <
+              eliminator.radius + s.radius + 4
+            ) {
+              s.lives--;
+              s.respawn();
+              eliminator.reset();
+              updateHUD();
+            }
+          }
+        }
+        for (let s of ships) {
+          if (s.lives <= 0) continue;
+          if (
+            base.destroyedTimer === 0 &&
+            Math.hypot(s.x - base.x, s.y - base.y) < base.radius + s.radius
+          ) {
+            s.lives--;
+            s.respawn();
+            updateHUD();
+          }
+          if (s.score >= s.lives * 6000 + 6000) {
+            s.lives++;
+            updateHUD();
+          }
+        }
+        const alive = ships.filter((s) => s.lives > 0).length;
+        if (alive === 0 && state === "playing") state = "gameover";
       }
 
       function update() {
@@ -922,7 +1064,47 @@
         ships.forEach((s) => s.update());
         base.update();
         if (eliminator) eliminator.update(ships);
-        // Full update for bolts, fireballs, baseFragments, fighters, spawning, checkCollisions
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          const b = bolts[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          bounce(b, 4, 0.96);
+          b.life--;
+          if (b.life <= 0) bolts.splice(i, 1);
+        }
+        for (let i = enemyBolts.length - 1; i >= 0; i--) {
+          const b = enemyBolts[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          bounce(b, 4, 0.96);
+          b.life--;
+          if (b.life <= 0) enemyBolts.splice(i, 1);
+        }
+        for (let i = fireballs.length - 1; i >= 0; i--) {
+          const f = fireballs[i];
+          f.x += f.vx;
+          f.y += f.vy;
+          bounce(f, 4, 0.96);
+          f.life--;
+          if (f.life <= 0) fireballs.splice(i, 1);
+        }
+        for (let i = baseFragments.length - 1; i >= 0; i--) {
+          const f = baseFragments[i];
+          f.x += f.vx;
+          f.y += f.vy;
+          f.vx *= 0.96;
+          f.vy *= 0.96;
+          f.angle += f.rotSpeed;
+          f.life--;
+          if (f.life <= 0) baseFragments.splice(i, 1);
+        }
+        fighters.forEach((f) => f.update(ships));
+        if (Date.now() - lastFighterSpawn > 1950 - round * 55) {
+          lastFighterSpawn = Date.now();
+          if (numPlayers === 1 || ships.filter((s) => s.lives > 0).length === 1)
+            spawnFighter();
+        }
+        checkCollisions();
       }
 
       function drawBackground() {
@@ -942,6 +1124,7 @@
           ctx.lineTo(WIDTH, y);
           ctx.stroke();
         }
+        // Title moved to HTML element - see gameTitle div
       }
 
       function draw() {
@@ -949,7 +1132,6 @@
         if (base) base.draw();
         if (eliminator) eliminator.draw();
         fighters.forEach((f) => f.draw());
-
         ctx.shadowBlur = 12;
         for (let f of baseFragments) {
           ctx.save();
@@ -970,7 +1152,6 @@
           ctx.restore();
         }
         ctx.shadowBlur = 8;
-
         bolts.forEach((b) => {
           ctx.fillStyle = "#00ffff";
           ctx.shadowColor = "#00ffff";
@@ -986,7 +1167,6 @@
           ctx.shadowColor = f.color;
           ctx.fillRect(f.x - 3, f.y - 3, 6, 6);
         });
-
         ships.forEach((s) => s.draw());
 
         if (debugMode && base) {
@@ -1046,108 +1226,44 @@
       function gameLoop() {
         update();
         draw();
-        if (state === "playing")
+        if (state === "playing") {
           document.getElementById("gameTitle").innerHTML =
             `ELIMINATOR<br>ROUND ${round}`;
+        }
         requestAnimationFrame(gameLoop);
-      }
-
-      // ==================== MULTIPLAYER ====================
-      function startMultiplayerGame() {
-        document.getElementById("overlay").innerHTML = "";
-        canvas.style.display = "block";
-        initGame(2);
-        state = "playing";
-        if (isHost) {
-          setInterval(() => {
-            if (conn && conn.open)
-              conn.send({
-                type: "state",
-                ships: ships.map((s) => ({
-                  x: s.x,
-                  y: s.y,
-                  angle: s.angle,
-                  lives: s.lives,
-                })),
-                round,
-              });
-          }, 80);
-        }
-      }
-
-      function handleRemoteData(data) {
-        if (data.type === "state" && data.ships) {
-          for (let i = 0; i < data.ships.length; i++)
-            if (ships[i]) {
-              ships[i].x = data.ships[i].x;
-              ships[i].y = data.ships[i].y;
-              ships[i].angle = data.ships[i].angle;
-              ships[i].lives = data.ships[i].lives;
-            }
-        }
-      }
-
-      function createRoom() {
-        peer = new Peer();
-        peer.on("open", (id) => {
-          document.getElementById("roomStatus").innerHTML =
-            `ROOM CODE: <b style="font-size:22px;color:#ff0">${id}</b><br>Waiting for player 2...`;
-          isHost = true;
-          myPlayerId = 0;
-          peer.on("connection", (connection) => {
-            conn = connection;
-            conn.on("open", () => startMultiplayerGame());
-            conn.on("data", handleRemoteData);
-          });
-        });
-      }
-
-      function joinRoom(roomId) {
-        peer = new Peer();
-        peer.on("open", () => {
-          conn = peer.connect(roomId);
-          conn.on("open", () => {
-            isHost = false;
-            myPlayerId = 1;
-            startMultiplayerGame();
-          });
-          conn.on("data", handleRemoteData);
-        });
-      }
-
-      function joinRoomPrompt() {
-        const code = prompt("Enter Room Code:");
-        if (code) joinRoom(code);
       }
 
       function showMenu() {
         const overlay = document.getElementById("overlay");
-        overlay.innerHTML = `
-                <div id="menu">
-                    <h1>TOMZELIMINATOR</h1>
-                    <div class="subtitle">TWO PLAYER — PEER TO PEER</div>
-                    <div class="option" onclick="createRoom()">CREATE ROOM</div>
-                    <div class="option" onclick="joinRoomPrompt()">JOIN ROOM</div>
-                    <div class="instructions">HUMAN ONLY • FULL GAMEPLAY • REAL-TIME MULTIPLAYER</div>
-                    <div id="roomStatus" style="margin-top:15px; font-size:13px; color:#ff0;"></div>
-                </div>
-            `;
+        overlay.innerHTML = `<div id="menu"><h1>TOMZELIMINATOR</h1><div class="subtitle">@ GREMLIN 1981</div><div class="option" onclick="startGame(1)">1 PLAYER — VS COMPUTER</div>
+<div class="instructions">MAX 3 ENERGY BOLTS • NEW BOLT KILLS OLDEST • DESTROY BASE TO SCORE • BASE SPAWNS ELIMINATOR • SHOOT FIGHTERS & ELIMINATOR TO SCORE • DRIVE FIGHTERS AND ELEMINATOR INTO BASE STATION TO SCORE</div>
+  <br><div style="margin-top:20px;font-size:12px;opacity:0.6">PLAYER 1: D left turn/F right turn/J thrust/K fire<br>DEBUG: B = toggle debug, P = freeze base rotation</div></div>`;
       }
 
-      window.onload = function () {
-        showMenu();
-        gameLoop();
+      window.startGame = function (count) {
+        canvas.style.display = "block";
+        document.getElementById("overlay").innerHTML = "";
+        initGame(count);
+        state = "playing";
       };
+
       window.addEventListener("keydown", (e) => {
         keys[e.code] = true;
-        if (state === "playing" && e.code === "KeyB") debugMode = !debugMode;
-        if (debugMode && e.code === "KeyP") rotationFrozen = !rotationFrozen;
+        if (state === "playing") {
+          if (e.code === "KeyB") debugMode = !debugMode;
+          if (debugMode && e.code === "KeyP") rotationFrozen = !rotationFrozen;
+        }
         if (state === "gameover" && e.code === "KeyR") {
           showMenu();
           state = "menu";
         }
       });
       window.addEventListener("keyup", (e) => (keys[e.code] = false));
+
+      window.onload = function () {
+        showMenu();
+        gameLoop();
+      };
     </script>
   </body>
 </html>
