@@ -923,7 +923,7 @@
         canvasEl.style.boxShadow = `0 0 40px ${leader.color}`;
       }
 
-      function createExplosion(x, y, small = false) {
+      function createExplosion(x, y, small = false, damaging = true) {
         for (let i = 0; i < (small ? 18 : 45); i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = small ? 3 + Math.random() * 4 : 6 + Math.random() * 7;
@@ -936,6 +936,7 @@
             color: ["#ff0000", "#ffff00", "#ff8800", "#ffffff"][
               Math.floor(Math.random() * 4)
             ],
+            damaging: damaging,
           });
         }
         Sound.playExplode();
@@ -1081,6 +1082,12 @@
         }
         for (let i = fireballs.length - 1; i >= 0; i--) {
           const f = fireballs[i];
+
+          // Skip non-damaging explosions (player death visuals)
+          if (f.damaging === false) {
+            continue; // Just skip damage-checking; let the fireball live and render
+          }
+
           for (let s of ships) {
             if (s.lives <= 0) continue;
 
@@ -1091,6 +1098,8 @@
 
             if (Math.hypot(f.x - s.x, f.y - s.y) < s.radius + 7) {
               s.lives--;
+              createExplosion(s.x, s.y, false, false); // non-damaging player death explosion
+              Sound.playExplode();
               fireballs.splice(i, 1);
               s.respawn();
               updateHUD();
@@ -1121,6 +1130,8 @@
               eliminator.radius + s.radius + 4
             ) {
               s.lives--;
+              createExplosion(s.x, s.y, false, false); // non-damaging player death explosion
+              Sound.playExplode();
               s.respawn();
               eliminator.reset();
               updateHUD();
@@ -1142,6 +1153,8 @@
               }
             }
             s.lives--;
+            createExplosion(s.x, s.y, false, false); // non-damaging player death explosion
+            Sound.playExplode();
             s.lastPushedBy = null;
             s.respawn();
             updateHUD();
@@ -1152,13 +1165,19 @@
           }
         }
         const alive = ships.filter((s) => s.lives > 0).length;
-        if (alive === 0 && state === "playing") state = "gameover";
+        if (state === "playing") {
+          if (alive === 0) state = "gameover";
+          else if (multiplayer && alive <= 1) state = "victory";
+        }
 
         if (multiplayer) updateBorderColor(); // Dynamic border for leading player
       }
 
       function update() {
-        if (state !== "playing") return;
+        if (state !== "playing" && state !== "victory") return;
+        // Guest never runs update — all game logic lives on the host.
+        // The guest only renders what applyGameState delivers.
+        if (multiplayer && !isHost) return;
         ships.forEach((s) => s.update());
         if (base) base.update();
         if (eliminator) eliminator.update(ships);
@@ -1317,23 +1336,111 @@
           ctx.save();
           ctx.fillStyle = "rgba(255,0,0,0.85)";
           ctx.fillRect(0, 0, WIDTH, HEIGHT);
-          ctx.fillStyle = "#fff";
           ctx.font = 'bold 48px "Press Start 2P"';
           ctx.textAlign = "center";
           ctx.shadowBlur = 30;
+          ctx.fillStyle = "#fff";
           ctx.shadowColor = "#ff0";
           ctx.fillText("GAME OVER", WIDTH / 2, HEIGHT / 2 - 30);
+          ctx.fillStyle = "#fff";
+          ctx.shadowColor = "#ff0";
           ctx.font = '22px "Press Start 2P"';
           ctx.fillText("PRESS R TO RESTART", WIDTH / 2, HEIGHT / 2 + 40);
+          ctx.restore();
+        }
+
+        if (state === "victory" && multiplayer && ships.length === 2) {
+          const winner = ships.find((s) => s.lives > 0);
+          ctx.save();
+
+          // Winner announcement - styled like HUD stats, positioned higher
+          if (winner) {
+            ctx.font = 'bold 20px "Press Start 2P"';
+            ctx.textAlign = "center";
+            ctx.fillStyle = winner.color;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = winner.color;
+            ctx.fillText(
+              (winner.id === 0 ? "CYAN WINS!" : "MAGENTA WINS!") +
+                "   •   R=RESTART   E=EXIT",
+              WIDTH / 2,
+              55,
+            );
+          }
+
+          // Bottom instruction - more descriptive
+          ctx.fillStyle = "rgba(255,255,255,0.6)";
+          ctx.shadowBlur = 0;
+          ctx.font = '12px "Press Start 2P"';
+          ctx.fillText(
+            "Winner can restart the game or end the session",
+            WIDTH / 2,
+            HEIGHT - 18,
+          );
           ctx.restore();
         }
       }
 
       function gameLoop() {
+        // Guest: extrapolate positions between host state packets for smooth rendering
+        if (
+          multiplayer &&
+          !isHost &&
+          (state === "playing" || state === "victory")
+        ) {
+          for (const s of ships) {
+            if (s.lives > 0) {
+              s.x += s.vx;
+              s.y += s.vy;
+            }
+          }
+          if (base) {
+            base.x += base.vx;
+            base.y += base.vy;
+            base.updateTunnelLine();
+          }
+          if (eliminator && eliminator.state !== "forming") {
+            eliminator.x += eliminator.vx;
+            eliminator.y += eliminator.vy;
+          }
+          for (const b of bolts) {
+            b.x += b.vx;
+            b.y += b.vy;
+            b.life--;
+          }
+          for (const b of enemyBolts) {
+            b.x += b.vx;
+            b.y += b.vy;
+            b.life--;
+          }
+          for (const f of fireballs) {
+            f.x += f.vx;
+            f.y += f.vy;
+            f.life--;
+          }
+          for (const f of fighters) {
+            f.x += f.vx;
+            f.y += f.vy;
+          }
+          for (const f of baseFragments) {
+            f.x += f.vx;
+            f.y += f.vy;
+            f.angle += f.rotSpeed;
+            f.life--;
+          }
+        }
         update();
         draw();
         // === SEND STATE FROM HOST ===
-        if (state === "playing" && multiplayer && isHost && conn && conn.open) {
+        if (
+          (state === "playing" ||
+            state === "gameover" ||
+            state === "victory") &&
+          multiplayer &&
+          isHost &&
+          conn &&
+          conn.open
+        ) {
           stateSendCounter++;
           if (stateSendCounter % 3 === 0) {
             // Reduced to ~20fps sync to prevent guest freezing
@@ -1376,14 +1483,27 @@
         peer.on("connection", function (c) {
           conn = c;
           conn.on("open", function () {
-            const menuEl = document.getElementById("menu");
-            if (menuEl) {
-              menuEl.innerHTML = `<h1>PLAYER JOINED!</h1><div class="subtitle">Ready?</div><div class="option" onclick="startMultiplayerHost()">START GAME</div>`;
-            }
+            // Auto-start the game as soon as the guest joins
+            setTimeout(() => {
+              if (conn && conn.open) {
+                startMultiplayerHost();
+              }
+            }, 800);
           });
           conn.on("data", function (data) {
             if (data.type === "inputs") {
               guestKeys = data.keys || {};
+            }
+            if (data.type === "restart" && state === "victory") {
+              initGame(2);
+              state = "playing";
+              stateSendCounter = 0;
+            }
+            if (data.type === "exit") {
+              state = "menu";
+              multiplayer = false;
+              showMenu();
+              canvas.style.display = "none";
             }
           });
           conn.on("close", function () {
@@ -1415,6 +1535,12 @@
           conn.on("data", function (data) {
             if (data.type === "state") {
               applyGameState(data.state);
+            }
+            if (data.type === "exit") {
+              state = "menu";
+              multiplayer = false;
+              showMenu();
+              canvas.style.display = "none";
             }
           });
           conn.on("close", function () {
@@ -1484,6 +1610,10 @@
                 vy: base.vy,
                 angle: base.angle,
                 destroyedTimer: base.destroyedTimer,
+                tunnelStartX: base.tunnelStartX,
+                tunnelStartY: base.tunnelStartY,
+                tunnelEndX: base.tunnelEndX,
+                tunnelEndY: base.tunnelEndY,
               }
             : null,
           eliminator: eliminator
@@ -1538,6 +1668,10 @@
           base.vy = gs.base.vy;
           base.angle = gs.base.angle;
           base.destroyedTimer = gs.base.destroyedTimer;
+          base.tunnelStartX = gs.base.tunnelStartX;
+          base.tunnelStartY = gs.base.tunnelStartY;
+          base.tunnelEndX = gs.base.tunnelEndX;
+          base.tunnelEndY = gs.base.tunnelEndY;
         }
         if (eliminator && gs.eliminator) {
           const e = gs.eliminator;
@@ -1556,7 +1690,18 @@
         bolts = gs.bolts ? gs.bolts.map((b) => ({ ...b })) : [];
         enemyBolts = gs.enemyBolts ? gs.enemyBolts.map((b) => ({ ...b })) : [];
         fireballs = gs.fireballs ? gs.fireballs.map((f) => ({ ...f })) : [];
-        fighters = gs.fighters ? gs.fighters.map((f) => ({ ...f })) : [];
+        fighters = gs.fighters
+          ? gs.fighters.map((fd) => {
+              const f = new Fighter(fd.x, fd.y);
+              f.vx = fd.vx;
+              f.vy = fd.vy;
+              f.angle = fd.angle;
+              f.radius = fd.radius;
+              f.fireCooldown = fd.fireCooldown;
+              f.lastPushedBy = fd.lastPushedBy;
+              return f;
+            })
+          : [];
         baseFragments = gs.baseFragments
           ? gs.baseFragments.map((f) => ({ ...f }))
           : [];
@@ -1592,6 +1737,39 @@
           } else {
             showMenu();
             state = "menu";
+          }
+        }
+        if (state === "victory" && multiplayer) {
+          const iWin =
+            ships.length === 2 &&
+            ships.find((s) => s.lives > 0) &&
+            ((isHost && ships[0].lives > 0) || (!isHost && ships[1].lives > 0));
+          if (iWin) {
+            if (e.code === "KeyR") {
+              if (isHost) {
+                initGame(2);
+                state = "playing";
+                stateSendCounter = 0;
+              } else {
+                // Guest winner signals host to restart via a data message
+                if (conn && conn.open) conn.send({ type: "restart" });
+              }
+            }
+            if (e.code === "KeyE") {
+              if (isHost) {
+                state = "menu";
+                multiplayer = false;
+                showMenu();
+                canvas.style.display = "none";
+                if (conn && conn.open) conn.send({ type: "exit" });
+              } else {
+                if (conn && conn.open) conn.send({ type: "exit" });
+                state = "menu";
+                multiplayer = false;
+                showMenu();
+                canvas.style.display = "none";
+              }
+            }
           }
         }
       });
